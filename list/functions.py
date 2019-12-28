@@ -57,3 +57,6 @@ def sum(l1: LinkedList[int], l2: LinkedList[int]) -> LinkedList[int]:
         result.next = LinkedList(carry)
 
     return head
+
+# 131. Given the head to a singly linked list, where each node also has a “random” pointer that points to anywhere in
+# the linked list, deep clone the list.

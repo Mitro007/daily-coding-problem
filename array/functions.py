@@ -50,19 +50,27 @@ def rotate(seq: MutableSequence[T], n: int) -> None:
 # 1. Make no transactions; the max profit on that day is the same as the previous day
 # 2. Sell; the max profit on that day is the difference of prices between that day and a previous day when the
 # stock was purchased, plus the max profit made until the buying day with one less transaction
+#
+# If there are n prices, the time complexity is O(n^2 * k). We can improve the time complexity by eliminating the
+# inner loop for determining the profit on sale if we store the profit for buying up to day - 2. Then the profit
+# for buying up to day - 1 can be calculated in constant time.
+#
+# Space complexity is O(nk). This can be improved too by observing that we only need the last two rows and one
+# column to calculate to profit for today (provided profit for buying up to day - 2 is stored).
 def stock_1(prices: Sequence[int], k: int) -> int:
     # profit[i][j] is the maximum profit that could be made on day i by making up to j transactions
     # GOTCHA: [[v] * col] * row references the same list in all rows!
     profits: List[List[int]] = [[0] * (k + 1) for _ in range(len(prices))]
 
-    def profit(selling_day: int, buying_day: int, num_txn: int) -> int:
-        return prices[selling_day] - prices[buying_day] + profits[buying_day][num_txn - 1]
-
     for day in range(1, len(prices)):
         for num_txn in range(1, k + 1):
-            best_buying_day: int = max(range(day), key=lambda d: profit(day, d, num_txn))
+            profit_if_sell: int = max(
+                map(
+                    lambda buying_day: prices[day] - prices[buying_day] + profits[buying_day][num_txn - 1],
+                    range(day)
+                )
+            )
             profit_if_do_nothing: int = profits[day - 1][num_txn]
-            profit_if_sell: int = profit(day, best_buying_day, num_txn)
             profits[day][num_txn] = max(profit_if_do_nothing, profit_if_sell)
 
     return profits[-1][-1]

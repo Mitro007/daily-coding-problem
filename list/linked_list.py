@@ -17,10 +17,10 @@ class LinkedListIterator(Generic[T]):
         raise StopIteration()
 
 
-class LinkedList(Generic[T]):
+class LinkedList(Generic[T], Iterable[T]):
     def __init__(self, val: T):
-        self.val = val
-        self.next = None
+        self.val: T = val
+        self.next: LinkedList[T] = None
 
     def __iter__(self):
         return LinkedListIterator(self)
