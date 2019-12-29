@@ -1,4 +1,7 @@
+import sys
 from typing import Sequence, MutableSequence, TypeVar, List
+
+import stack.functions as stack
 
 T = TypeVar("T")
 
@@ -74,3 +77,66 @@ def stock_1(prices: Sequence[int], k: int) -> int:
             profits[day][num_txn] = max(profit_if_do_nothing, profit_if_sell)
 
     return profits[-1][-1]
+
+
+# 136. Given an N by M matrix consisting only of 1's and 0's, find the largest rectangle containing only 1's and
+# return its area.
+#
+# For example, given the following matrix:
+#
+# [[1, 0, 0, 0],
+#  [1, 0, 1, 1],
+#  [1, 0, 1, 1],
+#  [0, 1, 0, 0]]
+#
+# Return 4.
+#
+# ANSWER: For each row, we build a histogram with the bars corresponding to all 1's in a column. Then we employ
+# the subroutine to find the largest rectangular area in a histogram.
+# For example, the histogram for row 2 (index 1) will have a single bar of length 2 at column 0.
+# out of all the areas for all the rows, we return the maximum one.
+def largest_rect(matrix: Sequence[Sequence[int]]) -> int:
+    histogram: MutableSequence[int] = [*matrix[0]]
+    largest_area: int = max(*histogram)
+
+    for row in range(1, len(matrix)):
+        for col in range(len(matrix[0])):
+            histogram[col] = (histogram[col] + 1) if matrix[row][col] == 1 else 0
+
+        largest_area = max(largest_area, stack.largest_area_in_hist(histogram))
+
+    return largest_area
+
+
+# 137. Implement a bit array.
+#
+# A bit array is a space efficient array that holds a value of 1 or 0 at each index.
+#
+# init(size): initialize the array with size
+# set(i, val): updates index at i with val where val is either 1 or 0.
+# get(i): gets the value at index i.
+#
+# ANSWER: Same as question 134, sparse array.
+
+# 138. Find the minimum number of coins required to make n cents.
+#
+# You can use standard American denominations, that is, 1¢, 5¢, 10¢, and 25¢.
+#
+# For example, given n = 16, return 3 since we can make it with a 10¢, a 5¢, and a 1¢.
+#
+# ANSWER: Let dp[n] be the min number of coins required to make n cents. We can't make any amount with coins that
+# are larger, so we only consider cases where amount > coin. Therefore, dp[i] = dp[n - coin] + 1, where 1 is for
+# using a coin. We find the min of this expression for all coins.
+#
+# Time complexity: O(coins * amt)
+def min_coins(coins: Sequence[int], amt: int) -> int:
+    # https://docs.python.org/3/library/sys.html#sys.maxsize
+    dp: MutableSequence[int] = [sys.maxsize] * (amt + 1)
+    dp[0] = 0
+
+    for i in range(1, amt + 1):
+        for j in range(len(coins)):
+            if i >= coins[j]:
+                dp[i] = min(dp[i], dp[i - coins[j]] + 1)
+
+    return dp[-1]

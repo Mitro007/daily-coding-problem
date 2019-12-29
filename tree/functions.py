@@ -1,4 +1,4 @@
-import math
+import sys
 from typing import TypeVar
 
 from tree.binary_tree import BinaryTree
@@ -44,19 +44,19 @@ def inorder_successor(node: BinaryTree[T]) -> T:
 #            |
 #            |
 #            -1
-def min_path_sum(root: BinaryTree[int]) -> float:
-    def _min_sum(node: BinaryTree[int], best: float, sum_so_far: float) -> float:
+def min_path_sum(root: BinaryTree[int]) -> int:
+    def _min_sum(node: BinaryTree[int], best: int, sum_so_far: int) -> int:
         if node is None:
             return best
 
         if node.left is None and node.right is None:
             return min(sum_so_far + node.val, best)
 
-        min_left: float = _min_sum(node.left, best, sum_so_far + node.val)
-        min_right: float = _min_sum(node.right, min(min_left, best), sum_so_far + node.val)
+        min_left: int = _min_sum(node.left, best, sum_so_far + node.val)
+        min_right: int = _min_sum(node.right, min(min_left, best), sum_so_far + node.val)
 
         return min(min_left, min_right)
 
     if root is None:
-        return 0.0
-    return _min_sum(root, math.inf, 0.0)
+        return 0
+    return _min_sum(root, sys.maxsize, 0)

@@ -1,3 +1,6 @@
+from typing import Sequence, MutableSequence
+
+
 # 128. The Tower of Hanoi is a puzzle game with three rods and n disks, each a different size.
 #
 # All the disks start off on the first rod in a stack. They are ordered by size, with the largest disk on the bottom
@@ -21,3 +24,33 @@
 # Move 2 to 1
 # Move 2 to 3
 # Move 1 to 3
+
+# Find the largest rectangular area possible in a given histogram where the largest rectangle can be made of a number
+# of contiguous bars. For simplicity, assume that all bars have same width and the width is 1 unit.
+# For example, consider the following histogram with 7 bars of heights {6, 2, 5, 4, 5, 1, 6}. The largest possible
+# rectangle possible is 12 (consisting of the bars 5, 4, 5).
+def largest_area_in_hist(hist: Sequence[int]) -> int:
+    if not hist:
+        return 0
+
+    # Each item j on the stack represents the end of the area at j. Where does that area start? After stack[j - 1],
+    # (index stack[j - 1] + 1) because the previous area ends at stack[j - 1], or if the stack is empty, at index 0.
+    # The following invariant hold for the stack:
+    # For i, j in [0, len(stack)), i > j, hist[stack[i]] >= hist[stack[j]]
+    stack: MutableSequence[int] = []
+    largest_area: int = -1
+
+    def current_area(i: int) -> int:
+        area: int = -1
+        while stack and hist[stack[-1]] > (hist[i] if i < len(hist) else -1):
+            j: int = stack.pop()
+            width: int = i - ((stack[-1] + 1) if stack else 0)
+            area = max(area, width * hist[j])
+        return area
+
+    for i, v in enumerate(hist):
+        if stack and hist[stack[-1]] > v:
+            largest_area = max(largest_area, current_area(i))
+        stack.append(i)
+
+    return max(largest_area, current_area(len(hist)))

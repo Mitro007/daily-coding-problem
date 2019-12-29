@@ -3,8 +3,9 @@ from __future__ import annotations
 import bisect
 import sys
 from abc import abstractmethod, ABC
+from collections import deque
 from enum import Enum, auto
-from typing import MutableSequence, Sequence, MutableMapping
+from typing import MutableSequence, Sequence, MutableMapping, Deque
 
 
 class SparseArrayType(Enum):
@@ -82,9 +83,8 @@ class ListOfList(SparseArray):
         # _data[_indices[i]] == arr[_indices[i]]
         # len(_data) == len(_indices)
 
-        # For better performance, use a deque and more specific insert/delete ops
-        self._data: MutableSequence[int] = []
-        self._indices: MutableSequence[int] = []
+        self._data: Deque[int] = deque()
+        self._indices: Deque[int] = deque()
 
         for i, v in enumerate(arr):
             if v != 0:
@@ -103,9 +103,11 @@ class ListOfList(SparseArray):
             if o != 0:
                 self._data[idx] = o
             else:
+                # deque handles the cases when deletion is at either end
                 self._indices.__delitem__(idx)
                 self._data.__delitem__(idx)
         elif o != 0:
+            # deque handles the cases when insertion is at either end
             self._indices.insert(idx, i)
             self._data.insert(idx, o)
 
