@@ -1,6 +1,7 @@
 import functools
 
 
+# LeetCode 260.
 # 140. Given an array of integers in which two elements appear exactly once and all other elements appear exactly,
 # twice, find the two elements that appear only once.
 #
@@ -26,10 +27,10 @@ import functools
 # We iterate over the original array twice, thus time complexity is O(n). We don't use any additional space, so space
 # complexity is constant.
 
-def unique_numbers(*arr: int) -> (int, int):
-    xor: int = functools.reduce(lambda x, y: x ^ y, arr)
+def unique_numbers(*nums: int) -> (int, int):
+    xor: int = functools.reduce(lambda x, y: x ^ y, nums)
     xor_str: str = bin(xor)
     first_set_bit: int = next(i for i in range(len(xor_str)) if xor_str[len(xor_str) - i - 1] == "1")
     mask: int = 1 << first_set_bit
 
-    return functools.reduce(lambda x, y: ((x[0] ^ y, x[1]) if (y & mask == mask) else (x[0], x[1] ^ y)), arr, (0, 0))
+    return functools.reduce(lambda x, y: ((x[0] ^ y, x[1]) if (y & mask == mask) else (x[0], x[1] ^ y)), nums, (0, 0))

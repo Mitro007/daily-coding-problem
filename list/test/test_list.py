@@ -16,3 +16,8 @@ class TestList:
 
         assert func.sum(l1, None) is l1
         assert func.sum(None, l2) is l2
+
+    def test_swap_pairs(self):
+        ll = LinkedList.from_iterable(range(1, 5))
+        assert list(func.swap_pairs(ll)) == [2, 1, 4, 3]
+        assert list(func.swap_pairs(LinkedList(1))) == [1]

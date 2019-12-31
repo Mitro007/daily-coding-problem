@@ -1,7 +1,9 @@
-from .linked_list import LinkedList
 import math
+from typing import TypeVar
 
+from .linked_list import LinkedList
 
+# LeetCode 2.
 # 127. Let's represent an integer in a linked list format by having each node represent a digit in the number.
 # The nodes make up the number in reversed order.
 #
@@ -18,6 +20,9 @@ import math
 #
 # return 124 (99 + 25) as:
 # 4 -> 2 -> 1
+
+T = TypeVar("T")
+
 
 def sum(l1: LinkedList[int], l2: LinkedList[int]) -> LinkedList[int]:
     # short circuit
@@ -58,5 +63,30 @@ def sum(l1: LinkedList[int], l2: LinkedList[int]) -> LinkedList[int]:
 
     return head
 
+
+# LeetCode 138.
 # 131. Given the head to a singly linked list, where each node also has a “random” pointer that points to anywhere in
 # the linked list, deep clone the list.
+
+# LeetCode 24.
+# 145. Given the head of a singly linked list, swap every two nodes and return its head.
+#
+# For example, given 1 -> 2 -> 3 -> 4, return 2 -> 1 -> 4 -> 3.
+def swap_pairs(head: LinkedList[T]) -> LinkedList[T]:
+    new_head: LinkedList[T] = None
+    prev: LinkedList[T] = None
+    node: LinkedList[T] = head
+
+    while node:
+        if node.next:
+            tmp: LinkedList[T] = node.next
+            if not new_head:
+                new_head = tmp
+            else:
+                prev.next = tmp
+            node.next = tmp.next
+            tmp.next = node
+            prev = node
+        node = node.next
+
+    return new_head if new_head else head

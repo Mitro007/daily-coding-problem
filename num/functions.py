@@ -1,4 +1,7 @@
-# Given a real number n, find the square root of n. For example, given n = 9, return 3.
+# LeetCode 69.
+# 129. Given a real number n, find the square root of n. For example, given n = 9, return 3.
+
+
 def square_root(n: int, tolerance: float) -> float:
     assert n >= 0, "n must be positive"
     prev_guess: float = 0.0

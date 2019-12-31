@@ -12,3 +12,14 @@ class TestStack:
     ])
     def test_largest_area_in_hist(self, hist, expected):
         assert func.largest_area_in_hist(hist) == expected
+
+    @pytest.mark.parametrize("s, valid", [
+        ("", True),
+        ("()", True),
+        ("(*)", True),
+        ("(*))", True),
+        ("(*))", True),
+        (")*(", False)
+    ])
+    def test_is_valid_parenthesis_str(self, s, valid):
+        assert func.is_valid_parenthesis_str(s) == valid

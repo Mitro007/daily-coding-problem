@@ -54,3 +54,39 @@ def largest_area_in_hist(hist: Sequence[int]) -> int:
         stack.append(i)
 
     return max(largest_area, current_area(len(hist)))
+
+
+# LeetCode 678.
+# You're given a string consisting solely of (, ), and *. * can represent either a (, ), or an empty string.
+# Determine whether the parentheses are balanced.
+#
+# For example, (()* and (*) are balanced. )*( is not balanced.
+#
+# ANSWER: Time and space complexity: O(n), since each character is pushed and popped at most once.
+def is_valid_parenthesis_str(s: str) -> bool:
+    left_parens: MutableSequence[int] = []
+    asterisks: MutableSequence[int] = []
+
+    for i, ch in enumerate(s):
+        if ch == "(":
+            left_parens.append(i)
+        elif ch == ")":
+            if left_parens:
+                left_parens.pop()
+            # treat * as left paren
+            elif asterisks:
+                asterisks.pop()
+            else:  # found unmatched right paren
+                return False
+        else:
+            asterisks.append(i)
+
+    while left_parens and asterisks:
+        # treat * as right paren
+        if left_parens[-1] < asterisks[-1]:
+            left_parens.pop()
+            asterisks.pop()
+        else:  # found unmatched left paren
+            break
+
+    return not left_parens
