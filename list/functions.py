@@ -3,6 +3,64 @@ from typing import TypeVar
 
 from .linked_list import LinkedList
 
+T = TypeVar("T")
+
+
+# LeetCode 206.
+# 73. Given the head of a singly linked list, reverse it in-place.
+# Example:
+#
+# Input: 1 -> 2 -> 3 -> 4 -> 5 -> NULL
+# Output: 5 -> 4 -> 3 -> 2 -> 1 -> NULL
+def reverse(ll: LinkedList[T]) -> LinkedList[T]:
+    node: LinkedList[T] = ll
+    prev: LinkedList[T] = None
+
+    while node:
+        nxt: LinkedList[T] = node.next
+        node.next = prev
+        prev = node
+        node = nxt
+
+    return prev
+
+
+# LeetCode 160.
+# Given two singly linked lists that intersect at some point, find the intersecting node. The lists are non-cyclical.
+# For example, given A = 3 -> 7 -> 8 -> 10 and B = 99 -> 1 -> 8 -> 10, return the node with value 8.
+# In this example, assume nodes with the same value are the exact same node objects.
+# Do this in O(M + N) time (where M and N are the lengths of the lists) and constant space.
+def intersection(l1: LinkedList[T], l2: LinkedList[T]) -> LinkedList[T]:
+    counter_1: int = 0
+    counter_2: int = 0
+    node_1: LinkedList[T] = l1
+    node_2: LinkedList[T] = l2
+
+    while node_1:
+        counter_1 += 1
+        node_1 = node_1.next
+
+    while node_2:
+        counter_2 += 1
+        node_2 = node_2.next
+
+    node_1 = l1
+    node_2 = l2
+
+    if counter_1 > counter_2:
+        for i in range(counter_1 - counter_2):
+            node_1 = node_1.next
+    else:
+        for i in range(counter_2 - counter_1):
+            node_2 = node_2.next
+
+    while node_1 is not node_2:
+        node_1 = node_1.next
+        node_2 = node_2.next
+
+    return node_1
+
+
 # LeetCode 2.
 # 127. Let's represent an integer in a linked list format by having each node represent a digit in the number.
 # The nodes make up the number in reversed order.
@@ -20,10 +78,6 @@ from .linked_list import LinkedList
 #
 # return 124 (99 + 25) as:
 # 4 -> 2 -> 1
-
-T = TypeVar("T")
-
-
 def sum(l1: LinkedList[int], l2: LinkedList[int]) -> LinkedList[int]:
     # short circuit
     if not l1:

@@ -41,10 +41,39 @@ class BinaryTree(Generic[T], Iterable[T]):
             self.right.parent = self
 
     def __iter__(self):
+        '''Returns an inorder iterator'''
         return BinaryTreeIterator(self)
 
     def __repr__(self):
         return f"{self.val}"
+
+    @classmethod
+    def from_iterable(cls, seq: Sequence[T]) -> BinaryTree[T]:
+        """ Builds a binary tree in level-order fashion.
+
+            Parameters
+            ----------
+            seq: Sequence[T]
+                The sequence of node values.
+
+            Returns
+            -------
+            BinaryTree[T]
+                The binary tree that was built.
+            """
+
+        def build_bintree(lo: int, i: int) -> BinaryTree[T]:
+            if (lo + i) >= len(seq) or seq[lo + i] is None:
+                return None
+            left: BinaryTree[T] = build_bintree(lo, 2 * i + 1)
+            if left is None:
+                right: BinaryTree[T] = build_bintree(lo + 2 * i + 2, 0)
+            else:
+                right: BinaryTree[T] = build_bintree(lo, 2 * i + 2)
+
+            return BinaryTree(seq[lo + i], left, right)
+
+        return build_bintree(0, 0)
 
     @classmethod
     def bst_from_iterable(cls, seq: Sequence[T]) -> BinaryTree[T]:

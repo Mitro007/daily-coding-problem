@@ -2,7 +2,8 @@
 
 [![](https://github.com/asarkar/daily-coding-problem/workflows/Daily%20Coding%20Problem/badge.svg)](https://github.com/asarkar/daily-coding-problem/actions)
 
-Solutions to questions 1 through 125 are found [here](https://github.com/asarkar/coding-interview).
+Solutions to questions 1 through 125 are found [here](https://github.com/asarkar/coding-interview). I will try to add
+Python solutions here as time permits.
 
 ## Run in Docker Container
 
