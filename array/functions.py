@@ -1,5 +1,5 @@
 import sys
-from typing import Sequence, MutableSequence, TypeVar, List, Tuple
+from typing import Sequence, MutableSequence, TypeVar, List, Tuple, Dict, Iterable
 
 import stack.functions as stack
 
@@ -12,6 +12,270 @@ def swap(seq: MutableSequence[T], i: int, j: int) -> None:
         tmp = seq[i]
         seq[i] = seq[j]
         seq[j] = tmp
+
+
+# LeetCode 1
+# 1. Given a list of numbers, return whether any two sums to k. For example, given [10, 15, 3, 7] and k of 17, return
+# true since 10 + 7 is 17.
+#
+# Bonus: Can you do this in one pass?
+def two_sum(nums: Sequence[int], k: int) -> Tuple[int, int]:
+    num_map: Dict[int, int] = {kv[1]: kv[0] for kv in enumerate(nums)}
+
+    return next(
+        ((kv[0], num_map[k - kv[1]]) for kv in enumerate(nums) if k - kv[1] in num_map and kv[0] != num_map[k - kv[1]]),
+        None
+    )
+
+
+# LeetCode 41.
+# 4. Given an array of integers, find the first missing positive integer in linear time and constant space.
+# In other words, find the lowest positive integer that does not exist in the array. The array can contain duplicates
+# and negative numbers as well.
+#
+# For example, the input [3, 4, -1, 1] should give 2. The input [1, 2, 0] should give 3.
+#
+# You can modify the input array in-place.
+#
+# ANSWER:
+# 1. We divide the array into 2 parts such that the first part consists of only non-negative numbers. Say we have
+# the starting index as 0 and the ending index as lo (inclusive).
+# 2. We traverse the array from index 0 to lo. We take the absolute value of the element at that index - say the
+# value is x.
+#  a. If x > lo + 1 or x == 0, we do nothing.
+#  b. Otherwise, we make the sign of the element at index x - 1 negative. We subtract 1 because we want to map
+#     positive numbers to array indices, and indices start from 0.
+# 3. Finally, we traverse the array once more from index 0 to lo. In case we encounter a positive element at some
+# index, we output index + 1. This is the answer. However, if we do not encounter any positive element, it means that
+# integers 1 to lo occur in the array. We output lo + 1.
+def missing_int(nums: MutableSequence[int]) -> int:
+    # If empty array or doesn't have 1, return 1
+    if not next((x for x in nums if x == 1), 0):
+        return 1
+
+    lo: int = 0
+    hi: int = len(nums) - 1
+    i: int = 0
+    pivot: int = 1
+
+    while i <= hi:
+        if nums[i] < pivot:
+            swap(nums, i, hi)
+            hi -= 1
+        elif nums[i] > pivot:
+            swap(nums, i, lo)
+            i += 1
+            lo += 1
+        else:
+            i += 1
+
+    x = 0
+    while x <= hi:  # hi is the index of the last positive number
+        y: int = abs(nums[x])
+        if 0 < y <= lo + 1 and nums[y - 1] > 0:  # Don't flip sign if already negative
+            nums[y - 1] *= -1
+        x += 1
+
+    return next((i for i, v in enumerate(nums[:hi + 1]) if v >= 0), x) + 1
+
+
+# 44. We can determine how "out of order" an array A is by counting the number of inversions it has. Two elements
+# A[i] and A[j] form an inversion if A[i] > A[j] but i < j. That is, a smaller element appears after a larger element.
+#
+# Given an array, count the number of inversions it has. Do this faster than O(N^2) time.
+#
+# You may assume each element in the array is distinct.
+#
+# For example, a sorted list has zero inversions. The array [2, 4, 1, 3, 5] has three inversions:
+# (2, 1), (4, 1), and (4, 3). The array [5, 4, 3, 2, 1] has ten inversions: every distinct pair forms an inversion.
+#
+# ANSWER: We merge sort the array and count inversions during the merge process. If for i in [0, len(left)) and
+# j in [0, len(right)), left(i) > right(j), then all elements after index i are also greater than right(j) and
+# count in the inversions.
+#
+# Time complexity: O(n log n). Space complexity: O(n), since two arrays of same length as the input are created.
+def count_inversions(nums: Sequence[int]) -> int:
+    nums_copy: List[int] = [i for i in nums]
+    tmp: List[int] = [0] * len(nums)
+
+    def merge(lo: int, mid: int, hi: int) -> int:
+        i: int = lo
+        j: int = mid
+        k: int = 0
+        counter: int = 0
+
+        while i < mid and j < hi:
+            if nums_copy[i] > nums_copy[j]:
+                counter += (mid - i)
+                tmp[k] = nums_copy[j]
+                j += 1
+            else:
+                tmp[k] = nums_copy[i]
+                i += 1
+            k += 1
+
+        while i < mid:
+            tmp[k] = nums_copy[i]
+            i += 1
+            k += 1
+
+        while j < hi:
+            tmp[k] = nums_copy[j]
+            j += 1
+            k += 1
+
+        for x in range(k):
+            nums_copy[lo + x] = tmp[x]
+
+        return counter
+
+    def merge_sort(lo: int, hi: int) -> int:
+        if hi - lo <= 1:
+            return 0
+        mid: int = lo + (hi - lo) // 2
+
+        x: int = merge_sort(lo, mid)
+        y: int = merge_sort(mid, hi)
+
+        return merge(lo, mid, hi) + x + y
+
+    return merge_sort(0, len(nums))
+
+
+# LeetCode 53.
+# 49. Given an array of numbers, find the maximum sum of any contiguous subarray of the array.
+#
+# For example, given the array [34, -50, 42, 14, -5, 86], the maximum sum would be 137, since we would take elements
+# 42, 14, -5, and 86.
+#
+# Given the array [-5, -1, -8, -9], the maximum sum would be 0, since we would not take any elements.
+#
+# Do this in O(N) time.
+#
+# ANSWER: We use Kadane's algorithm that takes advantage of the optimal substructure of the problem.
+#
+# Given array A, let M[i] be the maximum sum of the subarray ending at index i. M[i+1] could be obtained by extending
+# the M[i] with A[i+1]. Another possibility is that M[i] is a very small value (perhaps many of the elements are
+# negative integers), and we are better off just taking A[i+1] by itself.
+# Thus, the recurrence relation is:
+#
+# M[i] = max{ M[i - 1] + A[i], A[i] }, ∀ i = 1 to n - 1
+#      = 0 if i = 0.
+#
+# Basically, we are trying to figure out if to start a new streak, or continue the current one.
+# If the array contains only negative numbers, the maximum sum would be zero, since we would not take any elements.
+#
+# However, since each value of M[i] is only computed once, because this algorithm doesn't exhibit overlapping
+# subproblems (recomputing the same values over and over). Thus, it may not strictly be called dynamic programming.
+#
+def max_subarray_sum(nums: Sequence[int]) -> int:
+    best: int = -sys.maxsize + 1
+    dp: MutableSequence[int] = [best] * len(nums)
+    dp[0] = nums[0]
+
+    for i in range(1, len(nums)):
+        dp[i] = max(dp[i - 1] + nums[i], nums[i])
+
+    return max(0, max(dp))
+
+
+# LeetCode 33.
+# 58. An sorted array of integers was rotated an unknown number of times.
+#
+# Given such an array, find the index of the element in the array in faster than linear time. If the element doesn't
+# exist in the array, return null.
+#
+# For example, given the array [13, 18, 25, 2, 8, 10] and the element 8, return 4 (the index of 8 in the array).
+#
+# You can assume all the integers in the array are unique.
+#
+# ANSWER: In the rotated array, the largest element is potentially not at the end. Observe that all the elements after
+# the max element are sorted. Thus, if we take the middle element, and compare it to the end elements, we can tell
+# which side the max element is on relative to the middle element. All the elements on the other side of middle that
+# max is NOT on are sorted. We check if the target element falls on the sorted side, and if yes, we binary search
+# there. Else we search on the non-sorted side (the side containing max).
+#
+# Time complexity: O(log n)
+def search_in_rotated_sorted_array(nums: Sequence[int], target: int) -> int:
+    lo: int = 0
+    hi: int = len(nums) - 1
+
+    while lo <= hi:
+        mid = lo + (hi - lo) // 2
+        if nums[mid] == target:
+            return mid
+
+        if nums[lo] <= nums[mid] >= nums[hi]:  # max is in [mid, hi]
+            if nums[lo] <= target < nums[mid]:
+                hi = mid - 1
+            else:
+                lo = mid + 1
+        else:  # max is in [lo, mid)
+            if nums[hi] >= target > nums[mid]:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+
+    return -1
+
+
+# LeetCode 128.
+# 99. Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
+#
+# For example, given [100, 4, 200, 1, 3, 2], the longest consecutive element sequence is [1, 2, 3, 4].
+# Return its length: 4.
+#
+# Your algorithm should run in O(n) complexity.
+def longest_consecutive_seq(nums: Sequence[int]) -> int:
+    best: int = 0
+    x: Dict[int, int] = {i: 1 for i in nums}
+
+    for i in list(x.keys()):
+        if i not in x:
+            continue
+        counter: int = 1
+        j: int = 1
+        while i + j in x:
+            counter += 1
+            del x[i + j]
+            j += 1
+        j = 1
+        while i - j in x:
+            counter += 1
+            del x[i - j]
+            j += 1
+        del x[i]
+
+        best = max(best, counter)
+        if not x:
+            break
+
+    return best
+
+
+# 102. Given a list of integers and a number K, return which contiguous elements of the list sum to K.
+#
+# For example, if the list is [1, 2, 3, 4, 5] and K is 9, then it should return [2, 3, 4].
+#
+# ANSWER: We simply grow the current window until its sum exceeds k. Then we reduce from the left until the sum drops
+# below k.
+# Time complexity: O(n), since each element may be seen twice, first in the outer loop, and later in the inner loop.
+# The worst case is when the last element equals k and the rest sum to less than k.
+def subarray_sum(nums: Sequence[int], k: int) -> Iterable[int]:
+    start: int = 0
+    i: int = 0
+    total: int = 0
+
+    while total != k and i < len(nums):
+        current: int = nums[i]
+        total += current
+        i += 1
+
+        while total > k:
+            total -= nums[start]
+            start += 1
+
+    return nums[start:i]
 
 
 # LeetCode 189.

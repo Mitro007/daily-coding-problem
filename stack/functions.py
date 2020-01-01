@@ -1,4 +1,38 @@
-from typing import Sequence, MutableSequence
+from typing import Sequence, MutableSequence, Tuple, Iterable, List
+
+
+# LeetCode 56.
+# 77. Given a list of possibly overlapping intervals, return a new list of intervals where all overlapping intervals
+# have been merged.
+# The input list is not necessarily ordered in any way.
+# For example, given [(1, 3), (5, 8), (4, 10), (20, 25)], you should return [(1, 3), (4, 10), (20, 25)].
+#
+# ANSWER: Sort intervals by end time and merge when current interval starts after the previous one and ends before the
+# previous one, or current interval starts before the previous one.
+#
+# Time and space complexities: O(n), since we may put every interval at least once on the stack.
+def merge_overlapping_intervals(intervals: Iterable[Tuple[int, int]]) -> Iterable[Tuple[int, int]]:
+    sorted_intervals: List[Tuple[int, int]] = sorted(intervals, key=lambda x: x[1])
+    stack: List[Tuple[int, int]] = []
+
+    def should_merge() -> bool:
+        return len(stack) >= 2 and ((stack[-2][0] <= stack[-1][0] <= stack[-2][1]) or (stack[-1][0] <= stack[-2][0]))
+
+    def merge() -> None:
+        a: Tuple[int, int] = stack.pop()
+        b: Tuple[int, int] = stack.pop()
+        stack.append((min(a[0], b[0]), a[1]))
+
+    for x in sorted_intervals:
+        while should_merge():
+            merge()
+
+        stack.append(x)
+
+    while should_merge():
+        merge()
+
+    return stack
 
 
 # 128. The Tower of Hanoi is a puzzle game with three rods and n disks, each a different size.
@@ -62,7 +96,7 @@ def largest_area_in_hist(hist: Sequence[int]) -> int:
 #
 # For example, (()* and (*) are balanced. )*( is not balanced.
 #
-# ANSWER: Time and space complexity: O(n), since each character is pushed and popped at most once.
+# ANSWER: Time and space complexities: O(n), since each character is pushed and popped at most once.
 def is_valid_parenthesis_str(s: str) -> bool:
     left_parens: MutableSequence[int] = []
     asterisks: MutableSequence[int] = []
