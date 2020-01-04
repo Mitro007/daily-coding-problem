@@ -120,7 +120,12 @@ def sorted_courses(prerequisites: Dict[str, Sequence[str]]) -> Sequence[str]:
 # ANSWER: We launch a DFS from each cell looking for the next letter in the word in one of the neighbors.
 # If we get stuck, we backtrack until we found an unvisited neighbor.
 #
-# Time and space complexities: O(m^2 * n^2), since for each cell, all other cells may be visited once.
+# Time Complexity: The complexity is O(mn * 4^s) where m is the no. of rows and n is the no. of columns and s is
+# the length of the input string. When we start searching from a character we have 4 choices of neighbors for the
+# first character and subsequent characters have only 3 or fewer than 3 choices but we can take it as 4 (permissible
+# sloppiness in upper bound). This sloppiness would be acceptable for large matrices. So for each character we have 4
+# choices. Total no. of characters are s where s is the length of the input string. So one invocation of search
+# function O(4^s) time. In the worst case the search is invoked for mn times. So an upper bound would be O(mn * 4^s).
 def has_word(board: Sequence[Sequence[str]], word: str) -> bool:
     m: int = len(board)
     n: int = len(board[0])

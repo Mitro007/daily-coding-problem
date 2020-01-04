@@ -42,8 +42,8 @@ Upgrade `pip`
 pip install --upgrade pip
 ```
 
-Install `pytest`
-
-```
-$ pip install -U pytest
-```
+Install `pytest` and `flake8`
+ 
+ ```
+$ pip install -U pytest flake8
+ ```

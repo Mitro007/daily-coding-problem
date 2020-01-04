@@ -6,6 +6,66 @@ from array import functions as func
 
 
 class TestArray:
+    def test_missing_int(self):
+        assert func.missing_int([1, 2, 1, 0]) == 3
+        assert func.missing_int([3, 4, -1, 1]) == 2
+        assert func.missing_int([7, 8, 9, 11, 12]) == 1
+        assert func.missing_int([1]) == 2
+        assert func.missing_int([]) == 1
+        assert func.missing_int([0]) == 1
+        assert func.missing_int([2, 1]) == 3
+        assert func.missing_int([-1, -2, -3]) == 1
+        assert func.missing_int([1, 1]) == 2
+        assert func.missing_int([1000, -1]) == 1
+        assert func.missing_int([-10, -3, -100, -1000, -239, 1]) == 2
+        assert func.missing_int([1, 1]) == 2
+
+    def test_subarray_sum(self):
+        assert list(func.subarray_sum(range(1, 6), 9)) == list(range(2, 5))
+        assert list(func.subarray_sum([1, 2, 3, 4, 5], 0)) == []
+        assert list(func.subarray_sum([1, 2, 3, 4, 5], 1)) == [1]
+        assert list(func.subarray_sum([1, 2, 3, 4, 5], 5)) == [2, 3]
+        assert list(func.subarray_sum([5, 4, 3, 4, 5], 12)) == [5, 4, 3]
+        assert list(func.subarray_sum([5, 4, 3, 4, 5], 11)) == [4, 3, 4]
+        assert list(func.subarray_sum([1, 2, 3, 4, 5], 9)) == [2, 3, 4]
+        assert list(func.subarray_sum([1, 2, 3, 4, 5], 3)) == [1, 2]
+
+    def test_longest_consecutive_seq(self):
+        assert func.longest_consecutive_seq([100, 4, 200, 1, 3, 2]) == 4
+        assert func.longest_consecutive_seq([]) == 0
+        assert func.longest_consecutive_seq([1, 0, -1]) == 3
+        assert func.longest_consecutive_seq([9, 1, -3, 2, 4, 8, 3, -1, 6, -2, -4, 7]) == 4
+
+    @pytest.mark.parametrize("nums, total", [
+        ([34, -50, 42, 14, -5, 86], 137),
+        ([-2, 1, -3, 4, -1, 2, 1, -5, 4], 6),
+        ([8, -19, 5, -4, 20], 21),
+        ([-1, -2, -3], 0)
+    ])
+    def test_max_subarray_sum(self, nums, total):
+        assert func.max_subarray_sum(nums) == total
+
+    def test_count_inversions(self):
+        assert func.count_inversions([2, 4, 1, 3, 5]) == 3
+        assert func.count_inversions([5, 4, 3, 2, 1]) == 10
+        assert func.count_inversions([1, 2, 3, 4, 5]) == 0
+
+    @pytest.mark.parametrize("nums", [
+        [4, 5, 6, 7, 0, 1, 2],
+        [13, 18, 25, 2, 8, 10],
+        [3, 1],
+        [5, 1, 3],
+        [4, 5, 6, 7, 8, 1, 2, 3]
+    ])
+    def test_search_in_rotated_sorted_array(self, nums):
+        for i, v in enumerate(nums):
+            assert func.search_in_rotated_sorted_array(nums, v) == i
+
+    def test_two_sum(self):
+        assert func.two_sum([2, 7, 11, 15], 9) == (0, 1)
+        assert func.two_sum([3, 2, 4], 6) == (1, 2)
+        assert func.two_sum([3, 3], 6) == (0, 1)
+
     def test_rotate(self):
         seq: MutableSequence[int] = list(range(1, 7))
         func.rotate(seq, 2)
