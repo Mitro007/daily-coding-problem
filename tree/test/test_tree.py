@@ -4,11 +4,11 @@ from tree.binary_tree import BinaryTree
 
 class TestTree:
     def test_num_unival(self):
-        assert func.num_unival(BinaryTree.from_iterable([0, 1, 0, 1, 1, 1, 0])) == 5
-        assert func.num_unival(BinaryTree.from_iterable([5, 1, 5, 5, 5, None, 5])) == 4
+        assert func.num_unival(BinaryTree.build_level_order([0, 1, 0, 1, 1, 1, 0])) == 5
+        assert func.num_unival(BinaryTree.build_level_order([5, 1, 5, 5, 5, None, 5])) == 4
 
     def test_eval_bintree(self):
-        assert func.eval_bintree(BinaryTree.from_iterable(["*", "+", "+", "3", "2", "4", "5"])) == 45
+        assert func.eval_bintree(BinaryTree.build_level_order(["*", "+", "+", "3", "2", "4", "5"])) == 45
 
     def test_inorder_successor(self):
         ten = BinaryTree(10)
@@ -46,7 +46,20 @@ class TestTree:
         assert func.min_path_sum(seven) == 11
 
     def test_max_path_sum(self):
-        assert func.max_path_sum(BinaryTree.from_iterable([1, 2, 3])) == 6
-        assert func.max_path_sum(BinaryTree.from_iterable([-10, 9, 20, None, None, 15, 7])) == 42
-        assert func.max_path_sum(BinaryTree.from_iterable([-2, 6, None, 0, -6])) == 6
-        assert func.max_path_sum(BinaryTree.from_iterable([-1, None, 9, -6, 3, None, None, None, -2])) == 12
+        assert func.max_path_sum(BinaryTree.build_level_order([1, 2, 3])) == 6
+        assert func.max_path_sum(BinaryTree.build_level_order([-10, 9, 20, None, None, 15, 7])) == 42
+        assert func.max_path_sum(BinaryTree.build_level_order([-2, 6, None, 0, -6])) == 6
+        assert func.max_path_sum(BinaryTree.build_level_order([-1, None, 9, -6, 3, None, None, None, -2])) == 12
+
+    def test_prune_zeros(self):
+        root = BinaryTree.build_level_order([0, 1, 0, None, None, 1, 0, 0, 0])
+        assert list(func.prune_zeros(root)) == [1, 0, 1, 0]
+
+        root = BinaryTree.build_level_order([1, None, 0, 0, 1])
+        assert list(func.prune_zeros(root)) == [1, 0, 1]
+
+        root = BinaryTree.build_level_order([1, 0, 1, 0, 0, 0, 1])
+        assert list(func.prune_zeros(root)) == [1, 1, 1]
+
+        root = BinaryTree.build_level_order([1, 1, 0, 1, 1, 0, 1, 0])
+        assert list(func.prune_zeros(root)) == [1, 1, 1, 1, 0, 1]

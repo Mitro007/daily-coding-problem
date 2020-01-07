@@ -443,6 +443,7 @@ def partition(coins: MutableSequence[T], pivot: T) -> Tuple[int, int]:
 
         return lt, gt
 
+
 # 144. Given an array of numbers and an index i, return the index of the nearest larger number of the number at index i,
 # where distance is measured in array indices.
 #
@@ -455,3 +456,41 @@ def partition(coins: MutableSequence[T], pivot: T) -> Tuple[int, int]:
 #
 # ANSWER: Can solve in linear time by scanning both ways from i. If we preprocess the array to partition it around i,
 # can solve in constant time (see question 143).
+
+# LeetCode 969.
+# 147. Given a list, sort it using this method: reverse(lst, i, j), which reverses lst from i to j.
+#
+# ANSWER: This is known as Pancake sorting. At each iteration, we find the index of the maximum element among the
+# unsorted elements. Let's say this index is i. We then reverse [0, i], and then reverse [i, j], where j is the
+# index where nums[i] would be after the array is completely sorted. Clearly, j starts from the last index of the
+# array, and gets decremented by 1 at each iteration.
+#
+# Time complexity: Finding the max index is an O(n) operation. Since reverse does n/2 swaps, and we do 2 reversals,
+# there are O(n) swaps. Thus, we do O(n) work at each operation, and O(n^2) work for the whole algorithm.
+def pancake_sort(nums: MutableSequence[int]) -> None:
+    def reverse(i: int, j: int) -> None:
+        x: int = (j - i + 1) // 2
+        lo: int = i
+        hi: int = j
+
+        for y in range(x):
+            a: int = nums[lo + y]
+            b: int = nums[hi - y]
+            tmp: int = a
+            nums[lo + y] = b
+            nums[hi - y] = tmp
+            lo += 1
+            hi -= 1
+
+    def index_of_max(x: int) -> int:
+        """Return the index of the maximum element until the index x."""
+        return max(map(lambda y: (y, nums[y]), range(x + 1)), key=lambda z: z[1])[0]
+
+    for i in range(len(nums)):
+        # After the current iteration, nums[j] is going to contain the element that would be at index j if nums
+        # were sorted
+        j = len(nums) - 1 - i
+        hi = index_of_max(j)
+        if hi != j:
+            reverse(0, hi)
+            reverse(0, j)

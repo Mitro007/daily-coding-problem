@@ -134,3 +134,12 @@ class TestArray:
         assert all(i < pivot for i in arr[:lt])
         assert all(i == pivot for i in arr[lt:gt + 1])
         assert all(i > pivot for i in arr[gt + 1:])
+
+    def test_pancake_sort(self):
+        arr = [3, 2, 4, 1]
+        func.pancake_sort(arr)
+        assert arr == list(range(1, 5))
+
+        arr = list(reversed(range(1, 10)))
+        func.pancake_sort(arr)
+        assert arr == list(range(1, 10))

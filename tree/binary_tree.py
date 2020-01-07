@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TypeVar, Generic, Iterable, Sequence, List
+import collections
+from typing import TypeVar, Generic, Iterable, Sequence, List, Deque
 
 T = TypeVar("T")
 
@@ -48,7 +49,7 @@ class BinaryTree(Generic[T], Iterable[T]):
         return f"{self.val}"
 
     @classmethod
-    def from_iterable(cls, seq: Sequence[T]) -> BinaryTree[T]:
+    def build_level_order(cls, seq: Sequence[T]) -> BinaryTree[T]:
         """ Builds a binary tree in level-order fashion.
 
             Parameters
@@ -61,19 +62,27 @@ class BinaryTree(Generic[T], Iterable[T]):
             BinaryTree[T]
                 The binary tree that was built.
             """
+        if not seq:
+            return None
+        queue: Deque[BinaryTree[T]] = collections.deque()
+        root: BinaryTree[T] = BinaryTree(seq[0])
+        queue.append(root)
+        left: bool = True
+        parent: BinaryTree[T] = None
 
-        def build_bintree(lo: int, i: int) -> BinaryTree[T]:
-            if (lo + i) >= len(seq) or seq[lo + i] is None:
-                return None
-            left: BinaryTree[T] = build_bintree(lo, 2 * i + 1)
-            if left is None:
-                right: BinaryTree[T] = build_bintree(lo + 2 * i + 2, 0)
-            else:
-                right: BinaryTree[T] = build_bintree(lo, 2 * i + 2)
+        for i in range(1, len(seq)):
+            if left:
+                assert queue, "No parent found"
+                parent = queue.popleft()
+                if seq[i] is not None:
+                    parent.left = BinaryTree(seq[i])
+                    queue.append(parent.left)
+            elif seq[i] is not None:
+                parent.right = BinaryTree(seq[i])
+                queue.append(parent.right)
+            left = not left
 
-            return BinaryTree(seq[lo + i], left, right)
-
-        return build_bintree(0, 0)
+        return root
 
     @classmethod
     def bst_from_iterable(cls, seq: Sequence[T]) -> BinaryTree[T]:

@@ -1,4 +1,5 @@
 import functools
+from typing import Iterator
 
 
 # LeetCode 260.
@@ -34,3 +35,21 @@ def unique_numbers(*nums: int) -> (int, int):
     mask: int = 1 << first_set_bit
 
     return functools.reduce(lambda x, y: ((x[0] ^ y, x[1]) if (y & mask == mask) else (x[0], x[1] ^ y)), nums, (0, 0))
+
+
+# 148. Gray code is a binary code where each successive value differ in only one bit, as well as when wrapping around.
+# Gray code is common in hardware so that we don't see temporary spurious values during transitions.
+#
+# Given a number of bits n, generate a possible gray code for it.
+#
+# For example, for n = 2, one gray code would be [00, 01, 11, 10].
+#
+# For number of bits n, there are 2^n Gray codes, including zero. Thus, the maximum Gray code is 2^n - 1. Since,
+# by definition, Gray codes differ only by 1 bit from their neighbors, the i-th Gray code is given by the XOR of the
+# i-th and the (i - 1)th bits of the binary representation of i, where 0 <= i < 2^n.
+#
+# For the example above, n = 2, the corresponding Gray codes are 0 ^ 0 = 0, 1 ^ 0 = 1, 2 ^ 1 = 3 and, 3 ^ 1 = 2
+# (i >> 2 is simply moving the bits to the right by a bit, which is equivalent to integer division by 2).
+def gray_codes(n: int) -> Iterator[int]:
+    for i in range(1 << n):
+        yield i ^ (i >> 1)

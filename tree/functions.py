@@ -138,3 +138,40 @@ def min_path_sum(root: BinaryTree[int]) -> int:
     if root is None:
         return 0
     return min_sum(root, sys.maxsize, 0)
+
+
+# LeetCode 814.
+# 146. Given a binary tree where all nodes are either 0 or 1, prune the tree so that subtrees containing all 0s are
+# removed.
+#
+# For example, given the following tree:
+#
+#    0
+#   / \
+#  1   0
+#     / \
+#    1   0
+#   / \
+#  0   0
+# should be pruned to:
+#
+#    0
+#   / \
+#  1   0
+#     /
+#    1
+# We do not remove the tree at the root or its left child because it still has a 1 as a descendant.
+def prune_zeros(root: BinaryTree[int]) -> BinaryTree[int]:
+    if not root:
+        return None
+    left: BinaryTree[int] = prune_zeros(root.left)
+    right: BinaryTree[int] = prune_zeros(root.right)
+
+    if left is None and right is None and root.val == 0:
+        return None
+    if left is None:
+        root.left = None
+    if right is None:
+        root.right = None
+
+    return root
