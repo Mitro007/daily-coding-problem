@@ -1,6 +1,7 @@
+import collections
 import operator
 import sys
-from typing import TypeVar, Dict, Callable, Tuple
+from typing import TypeVar, Dict, Callable, Tuple, Set, MutableMapping, Iterable, Deque
 
 from tree.binary_tree import BinaryTree
 
@@ -175,3 +176,91 @@ def prune_zeros(root: BinaryTree[int]) -> BinaryTree[int]:
         root.right = None
 
     return root
+
+
+# 160. Given a tree where each edge has a weight, compute the length of the longest path in the tree.
+#
+# For example, given the following tree:
+#
+#    a
+#   /|\
+#  b c d
+#     / \
+#    e   f
+#   / \
+#  g   h
+# and the weights: a-b: 3, a-c: 5, a-d: 8, d-e: 2, d-f: 4, e-g: 1, e-h: 1, the longest path would be c -> a -> d -> f,
+# with a length of 17.
+#
+# The path does not have to pass through the root, and each node can have any amount of children.
+#
+# ANSWER: This problem is the same as diameter of a tree, which is defined as the longest path between any two leaf
+# nodes of the tree. The length of the path is measured in terms of the number of nodes in it.
+#
+# The algorithm to find the diameter is as follows:
+# 1. Run BFS on any node s in the graph, remembering the node u discovered last.
+# 2. Run BFS from u remembering the node v discovered last. d(u, v) is the diameter of the tree.
+#
+# Proof, taken from https://cs.stackexchange.com/a/86771/95996:
+# Suppose we have two vertices a and b such that the distance between a and b on the path p(a, b) is a diameter,
+# e.g. the distance d(a, b) is maximum possible distance between any two points in the tree. Suppose we also have a
+# node s ≠ a, b (if s = a, then it would be obvious that the scheme works, since the first BFS would get b, and the
+# second would return to a). Suppose also that we have a node u such that d(s, u) is maximum for any node in the tree.
+#
+# Lemma 0: Both a and b are leaf nodes.
+#
+# Proof: If they weren't leaf nodes, we could increase d(a, b) by extending the endpoints to leaf nodes,
+# contradicting d(a, b) being a diameter.
+#
+# Lemma 1: max[d(s, a), d(s, b)] = d(s, u).
+#
+# Proof: Suppose for the sake of contradiction that both d(s, a) and d(s, b) were strictly less than d(s, u).
+# We look at two cases:
+#
+# Case 1: path p(a, b) does not contain vertex s. In this case, d(a, b) cannot be the diameter. To see why, let t be
+# the unique vertex on p(a, b) with the smallest distance to s. Then, we see that
+# d(a, u) = d(a, t) + d(t, s) + d(s, u)
+# Since d(s, u) > d(s, b) by assumption,
+# d(a, t) + d(t, s) + d(s, u) > d(a, t) + d(t, s) + d(s, b)
+# d(a, u) > d(a, b)
+#
+# Similarly, we would also have d(b, u) > d(a, b). This contradicts d(a, b) being a diameter.
+#
+# Case 2: path p(a, b) contains vertex s. In this case, d(a, b) again cannot be the diameter, since for some vertex u
+# such that d(s, u) is maximum for any node in the tree, both d(a, u) and d(b, u) would be greater than d(a, b).
+#
+# Lemma 1 gives the reason why we start the second BFS at the last-discovered vertex u of the first BFS.
+# If u is the unique vertex with the greatest possible distance from s, then by Lemma 1, it must be one of the
+# endpoints of some path with a distance equal to the diameter, and hence a second BFS with u as the root unambiguously
+# finds the diameter. On the other hand, if there is at least one other vertex v such that d(s, v) = d(s, u), then we
+# know that the diameter is d(a, b) = 2d(s, u), and it doesn't matter whether we start the second BFS at u or v.
+def longest_path(edges: Iterable[Tuple[str, str, int]]) -> int:
+    graph: MutableMapping[str, MutableMapping[str, int]] = collections.defaultdict(collections.defaultdict)
+    for u, v, i in edges:
+        graph[u][v] = graph[v][u] = i
+
+    visited: Set[str] = set()
+    dist: MutableMapping[str, int] = collections.defaultdict(int)
+    queue: Deque[str] = collections.deque()
+
+    def bfs() -> None:
+        while queue:
+            v: str = queue.popleft()
+            visited.add(v)
+
+            for u in filter(lambda x: x not in visited, graph[v].keys()):
+                dist[u] = dist[v] + graph[v][u]
+                queue.append(u)
+
+    start: str = next(iter(graph.keys()))
+    queue.append(start)
+    bfs()
+
+    start = max(dist.items(), key=lambda kv: kv[1])[0]
+    queue.clear()
+    queue.append(start)
+    dist.clear()
+    visited.clear()
+    bfs()
+
+    return max(dist.values())

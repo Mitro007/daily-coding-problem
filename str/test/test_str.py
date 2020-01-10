@@ -1,5 +1,6 @@
-from str import functions as func
 import pytest
+
+from str import functions as func
 
 
 class TestString:
@@ -29,3 +30,14 @@ class TestString:
         assert func.anagrams("abab", "ab") == [0, 1, 2]
         assert func.anagrams("baa", "aa") == [1]
         assert func.anagrams("", "a") == []
+
+    def test_smallest_dist(self):
+        assert func.smallest_dist("dog cat hello cat dog dog hello cat world", ("hello", "world")) == 1
+
+    def test_can_be_made_palindrome(self):
+        assert func.can_be_made_palindrome("carrace")
+        assert not func.can_be_made_palindrome("daily")
+
+    def test_first_recurring_ch(self):
+        assert func.first_recurring_ch("acbbac") == "b"
+        assert func.first_recurring_ch("abcdef") is None

@@ -1,6 +1,6 @@
 import collections
-from collections import deque
-from typing import MutableSequence, Tuple, Deque, Iterable, Counter
+import sys
+from typing import MutableSequence, Tuple, Deque, Iterable, Counter, MutableMapping
 
 
 # LeetCode 5.
@@ -106,7 +106,7 @@ def anagrams(s: str, w: str) -> Iterable[int]:
 # Follow-up: Does your solution work for the following cases: "hello/world:here/", "hello//world:here"
 def reverse_string_preserving_delimiters(s: str) -> str:
     word_stack: MutableSequence[str] = []
-    delimiter_queue: Deque[str] = deque()
+    delimiter_queue: Deque[str] = collections.deque()
     word: MutableSequence[str] = []
     delimiter: MutableSequence[str] = []
 
@@ -141,3 +141,55 @@ def reverse_string_preserving_delimiters(s: str) -> str:
         word_stack.append(f"{word_stack.pop()}{delimiter_queue.popleft()}")
 
     return word_stack.pop()
+
+
+# 153. Find an efficient algorithm to find the smallest distance (measured in number of words) between any two given
+# words in a string.
+#
+# For example, given words "hello", and "world" and a text content of "dog cat hello cat dog dog hello cat world",
+# return 1 because there's only one word "cat" in between the two words.
+#
+# ANSWER: Time complexity: O(n).
+def smallest_dist(text: str, words: Tuple[str, str]) -> int:
+    i = j = -1
+    smallest: int = sys.maxsize
+
+    for x, w in enumerate(text.split()):
+        if w == words[0]:
+            i = x
+        elif w == words[1]:
+            j = x
+
+        if i >= 0 and j >= 0:
+            smallest = min(smallest, abs(i - j))
+
+    return smallest - 1
+
+
+# 157. Given a string, determine whether any permutation of it is a palindrome.
+#
+# For example, carrace should return true, since it can be rearranged to form racecar, which is a palindrome. daily
+# should return false, since there's no rearrangement that can form a palindrome.
+def can_be_made_palindrome(s: str) -> bool:
+    counter: Counter[str] = collections.Counter(s)
+    num_odd: int = sum(v % 2 != 0 for v in counter.values())
+
+    return num_odd == len(s) % 2
+
+
+# 159. Given a string, return the first recurring character in it, or null if there is no recurring character.
+#
+# For example, given the string "acbbac", return "b". Given the string "abcdef", return null.
+def first_recurring_ch(s: str) -> str:
+    ch_freq: MutableMapping[str, int] = dict()
+    x: Tuple[int, int] = (len(s), -1)
+
+    for i, ch in enumerate(s):
+        if ch in ch_freq:
+            last_idx: int = ch_freq[ch]
+            if i - last_idx < x[0]:
+                x = (i - last_idx, last_idx)
+        else:
+            ch_freq[ch] = i
+
+    return s[x[1]] if x[1] >= 0 else None

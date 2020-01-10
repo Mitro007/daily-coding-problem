@@ -63,3 +63,10 @@ class TestTree:
 
         root = BinaryTree.build_level_order([1, 1, 0, 1, 1, 0, 1, 0])
         assert list(func.prune_zeros(root)) == [1, 1, 1, 1, 0, 1]
+
+    def test_longest_path(self):
+        assert func.longest_path([
+            ("a", "b", 3), ("a", "c", 5), ("a", "d", 8),
+            ("d", "e", 2), ("d", "f", 4),
+            ("e", "g", 1), ("e", "h", 1)
+        ]) == 17
