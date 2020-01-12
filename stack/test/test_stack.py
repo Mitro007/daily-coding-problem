@@ -40,3 +40,10 @@ class TestStack:
     ])
     def test_is_valid_parenthesis_str(self, s, valid):
         assert func.is_valid_parenthesis_str(s) == valid
+
+    def test_eval_rpn(self):
+        assert func.eval_rpn(["5", "3", "+"]) == 8
+        assert func.eval_rpn(["2", "1", "+", "3", "*"]) == 9
+        assert func.eval_rpn(["4", "13", "5", "/", "+"]) == 6
+        assert func.eval_rpn(["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]) == 22
+        assert func.eval_rpn([15, 7, 1, 1, '+', '-', '/', 3, '*', 2, 1, 1, '+', '+', '-']) == 5

@@ -495,6 +495,7 @@ def pancake_sort(nums: MutableSequence[int]) -> None:
             reverse(0, hi)
             reverse(0, j)
 
+
 # LeetCode 733.
 # 151. Given a 2-D matrix representing an image, a location of a pixel in the screen and a color C, replace the color
 # of the given pixel and all adjacent same colored pixels with C.
@@ -511,3 +512,63 @@ def pancake_sort(nums: MutableSequence[int]) -> None:
 # G G G
 # G G G
 # B B B
+
+# LeetCode 287.
+# 164. You are given an array of length n + 1 whose elements belong to the set {1, 2, ..., n}. By the pigeonhole
+# principle, there must be a duplicate. Find it in linear time and space.
+def find_dup(nums: Sequence[int]) -> int:
+    nums_cp: Set[int] = set(nums)
+
+    for i in nums:
+        if i not in nums_cp:
+            return i
+        nums_cp.remove(i)
+
+    return None
+
+
+# LeetCode 315.
+# 165. Given an array of integers, return a new array where each element in the new array is the number of smaller
+# elements to the right of that element in the original input array.
+#
+# For example, given the array [3, 4, 9, 6, 1], return [1, 1, 2, 1, 0], since:
+#
+# There is 1 smaller element to the right of 3
+# There is 1 smaller element to the right of 4
+# There are 2 smaller elements to the right of 9
+# There is 1 smaller element to the right of 6
+# There are no smaller elements to the right of 1
+#
+# ANSWER: We can solve this problem trivially in O(n^2) time by counting the smaller numbers to the right of each
+# number. Can we do better?
+# Observe that if we traverse two sorted subsequences from the end, if the current number in the left array is greater
+# than the current one in the right array, the number in the left array has len(right) smaller elements to its right in
+# the original array. If the right array is empty, all the numbers in it were no smaller than the current number in the
+# left array.
+# This is essentially the merge step in merge sort, except instead of building the merged array by appending
+# non-decreasing numbers, we build it by prepending non-increasing numbers to the left.
+#
+# Time complexity: O(n log(n)). We create a bunch of intermediate arrays, but this can be eliminated by passing around
+# an array of equal length as the original unsorted array.
+def count_smaller(nums: Sequence[int]) -> Sequence[int]:
+    count: MutableSequence[int] = [0] * len(nums)
+
+    def sort(xs: List[Tuple[int, int]]) -> None:
+        mid: int = len(xs) // 2
+        if mid < 1:
+            return
+
+        left: List[Tuple[int, int]] = xs[:mid]
+        sort(left)
+        right: List[Tuple[int, int]] = xs[mid:]
+        sort(right)
+
+        for i in reversed(range(len(xs))):
+            if left and ((right and left[-1][1] > right[-1][1]) or not right):
+                count[left[-1][0]] += len(right)
+                xs[i] = left.pop()
+            else:
+                xs[i] = right.pop()
+
+    sort(list(enumerate(nums)))
+    return count

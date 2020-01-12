@@ -41,3 +41,7 @@ class TestString:
     def test_first_recurring_ch(self):
         assert func.first_recurring_ch("acbbac") == "b"
         assert func.first_recurring_ch("abcdef") is None
+
+    def test_shortest_unique_prefix(self):
+        assert func.shortest_unique_prefix(["dog", "cat", "apple", "apricot", "fish"]) == ["d", "c", "app", "apr", "f"]
+        assert func.shortest_unique_prefix(["zebra", "dog", "duck", "dove"]) == ["z", "dog", "du", "dov"]

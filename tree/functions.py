@@ -195,11 +195,11 @@ def prune_zeros(root: BinaryTree[int]) -> BinaryTree[int]:
 # The path does not have to pass through the root, and each node can have any amount of children.
 #
 # ANSWER: This problem is the same as diameter of a tree, which is defined as the longest path between any two leaf
-# nodes of the tree. The length of the path is measured in terms of the number of nodes in it.
+# nodes of the tree. The length of the path is measured in terms of the number of edges in it.
 #
 # The algorithm to find the diameter is as follows:
-# 1. Run BFS on any node s in the graph, remembering the node u discovered last.
-# 2. Run BFS from u remembering the node v discovered last. d(u, v) is the diameter of the tree.
+# 1. Run BFS on any node s in the graph, remembering the node u with the maximum distance from s.
+# 2. Run BFS from u remembering the node v with the maximum distance from u. d(u, v) is the diameter of the tree.
 #
 # Proof, taken from https://cs.stackexchange.com/a/86771/95996:
 # Suppose we have two vertices a and b such that the distance between a and b on the path p(a, b) is a diameter,

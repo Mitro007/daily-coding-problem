@@ -143,3 +143,12 @@ class TestArray:
         arr = list(reversed(range(1, 10)))
         func.pancake_sort(arr)
         assert arr == list(range(1, 10))
+
+    def test_find_dup(self):
+        assert func.find_dup([1, 3, 4, 2, 2]) == 2
+        assert func.find_dup([3, 1, 3, 4, 2]) == 3
+        assert func.find_dup([2] * 5) == 2
+
+    def test_count_smaller(self):
+        assert func.count_smaller([3, 4, 9, 6, 1]) == [1, 1, 2, 1, 0]
+        assert func.count_smaller([5, 2, 6, 1]) == [2, 1, 1, 0]

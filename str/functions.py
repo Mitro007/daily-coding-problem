@@ -1,6 +1,8 @@
 import collections
 import sys
-from typing import MutableSequence, Tuple, Deque, Iterable, Counter, MutableMapping
+from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping
+
+from .shortest_prefix_trie import ShortestPrefixTrie
 
 
 # LeetCode 5.
@@ -193,3 +195,38 @@ def first_recurring_ch(s: str) -> str:
             ch_freq[ch] = i
 
     return s[x[1]] if x[1] >= 0 else None
+
+
+# 162. Given a list of words, return the shortest unique prefix of each word. For example, given the list:
+#
+# dog
+# cat
+# apple
+# apricot
+# fish
+# Return the list:
+#
+# d
+# c
+# app
+# apr
+# f
+#
+# ANSWER: We build a Trie that remembers at each node whether or not it's part of a common prefix of the words along
+# that branch. For example, if the word "apple" is inserted, every node along that branch has prefix=False.
+# However, if we then insert "apricot", nodes "a" and "p" have prefix=True, indicating both words have a common
+# prefix "ap".
+# With this, finding unique prefix for a word is simply looking for the first node with prefix=False.
+# We assume that one word isn't a prefix of another, in which case, we won't have a unique prefix for that word.
+#
+# To build the Trie, we must insert every character in every word. If average word length is n, and there are m words,
+# building the Trie takes O(mn) time and space.
+# In the worst case, all words match up to the penultimate character and finding a common prefix takes O(m * (n - 1))
+# time, or O(mn) time.
+def shortest_unique_prefix(words: Sequence[str]) -> Sequence[str]:
+    trie: ShortestPrefixTrie = ShortestPrefixTrie()
+
+    for w in words:
+        trie.insert(w)
+
+    return [trie.shortest_prefix(w) for w in words]

@@ -1,4 +1,5 @@
-from typing import Sequence, MutableSequence, Tuple, Iterable, List
+import operator
+from typing import Sequence, MutableSequence, Tuple, Iterable, Mapping, Callable, List
 
 
 # LeetCode 56.
@@ -125,6 +126,7 @@ def is_valid_parenthesis_str(s: str) -> bool:
 
     return not left_parens
 
+
 # 154. Implement a stack API using only a heap. A stack implements the following methods:
 #
 # push(item), which adds an element to the stack
@@ -135,3 +137,32 @@ def is_valid_parenthesis_str(s: str) -> bool:
 # pop(), which removes and returns the max value of the heap
 #
 # ANSWER: Maintain a monotonically increasing counter, and push (counter, value) to the heap. Increment counter.
+
+# LeetCode 150.
+# 163. Given an arithmetic expression in Reverse Polish Notation, write a program to evaluate it.
+#
+# The expression is given as a list of numbers and operands. For example: [5, 3, '+'] should return 5 + 3 = 8.
+#
+# For example, [15, 7, 1, 1, '+', '-', '/', 3, '*', 2, 1, 1, '+', '+', '-'] should return 5, since it is equivalent
+# to ((15 / (7 - (1 + 1))) * 3) - (2 + (1 + 1)) = 5.
+#
+# You can assume the given expression is always valid.
+def eval_rpn(tokens: List[str]) -> int:
+    operand_stack: MutableSequence[int] = []
+    ops: Mapping[str, Callable[[int, int], int]] = {
+        "+": operator.add,
+        "-": operator.sub,
+        "*": operator.mul,
+        "/": operator.truediv  # floordiv gives 6 // -132 = -1, but we want 0
+    }
+
+    for x in tokens:
+        if x not in ops:
+            operand_stack.append(int(x))
+        elif len(operand_stack) > 1:
+            op1: int = operand_stack.pop()
+            op2: int = operand_stack.pop()
+            result: int = ops[x](op2, op1) if x != "/" else int(ops[x](op2, op1))
+            operand_stack.append(result)
+
+    return operand_stack.pop()

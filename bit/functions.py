@@ -53,3 +53,16 @@ def unique_numbers(*nums: int) -> (int, int):
 def gray_codes(n: int) -> Iterator[int]:
     for i in range(1 << n):
         yield i ^ (i >> 1)
+
+
+# LeetCode 190.
+# 161. Given a 32-bit integer, return the number with its bits reversed.
+#
+# For example, given the binary number 1111 0000 1111 0000 1111 0000 1111 0000,
+# return 0000 1111 0000 1111 0000 1111 0000 1111.
+#
+# ANSWER: Since Python 3 can handle arbitrary-length integers, we first mask the input to 32 bits. We then convert to
+# binary, reverse until the 0b prefix, and append zeros if necessary since bin(n) function doesn't return preceding
+# zeros. We return after converting the binary string to int.
+def reverse_bits(n: int) -> int:
+    return int("{:0<32}".format(bin(n & ((1 << 32) - 1))[:1:-1]), 2)
