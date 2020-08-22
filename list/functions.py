@@ -144,3 +144,60 @@ def swap_pairs(head: LinkedList[T]) -> LinkedList[T]:
         node = node.next
 
     return new_head if new_head else head
+
+
+# LeetCode 148.
+# 169. Given a linked list, sort it in O(n log n) time and constant space.
+#
+# For example, the linked list 4 -> 1 -> -3 -> 99 should become -3 -> 1 -> 4 -> 99.
+def sort(linked_list: LinkedList[int]) -> LinkedList[int]:
+    # Return n // 2 element
+    def middle(head: LinkedList[int]) -> LinkedList[int]:
+        if not head or not head.next:
+            return head
+        slow = head
+        fast = head.next
+
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        return slow
+
+    def merge(head1: LinkedList[int], head2: LinkedList[int]) -> LinkedList[int]:
+        p1 = head1
+        p2 = head2
+        prev = head = None
+
+        while p1 and p2:
+            smaller = p1 if p1.val < p2.val else p2
+            if not head:
+                head = smaller
+            if prev:
+                prev.next = smaller
+            prev = smaller
+
+            if smaller == p1:
+                p1 = p1.next
+            else:
+                p2 = p2.next
+
+        if prev:
+            prev.next = p1 or p2
+        else:
+            head = p1 or p2
+
+        return head
+
+    def merge_sort(head: LinkedList[int]) -> LinkedList[int]:
+        if head and head.next:
+            mid = middle(head)
+            mid_next = mid.next
+            # Makes it easier to stop
+            mid.next = None
+
+            return merge(merge_sort(head), merge_sort(mid_next))
+        else:
+            return head
+
+    return merge_sort(linked_list)

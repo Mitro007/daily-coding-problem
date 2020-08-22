@@ -45,3 +45,18 @@ class TestString:
     def test_shortest_unique_prefix(self):
         assert func.shortest_unique_prefix(["dog", "cat", "apple", "apricot", "fish"]) == ["d", "c", "app", "apr", "f"]
         assert func.shortest_unique_prefix(["zebra", "dog", "duck", "dove"]) == ["z", "dog", "du", "dov"]
+
+    def test_palindrome_pairs(self):
+        assert func.palindrome_pairs(["abcd", "dcba", "lls", "s", "sssll"]) == [(0, 1), (1, 0), (3, 2), (2, 4)]
+        assert func.palindrome_pairs(["bat", "tab", "cat"]) == [(0, 1), (1, 0)]
+        assert func.palindrome_pairs(["code", "edoc", "da", "d"]) == [(0, 1), (1, 0), (2, 3)]
+        assert func.palindrome_pairs(["a", ""]) == [(0, 1), (1, 0)]
+        assert func.palindrome_pairs(["a", "b", "c", "ab", "ac", "aa"]) == [(1, 3), (3, 0), (2, 4), (4, 0), (0, 5),
+                                                                            (5, 0)]
+
+    def test_ladder_length(self):
+        assert func.ladder_length("hit", "cog", ["hot", "dot", "dog", "lot", "log", "cog"]) == 5
+        assert func.ladder_length("hit", "cog", ["hot", "dot", "dog", "lot", "log"]) == 0
+        assert func.ladder_length("hot", "dog", ["hot", "dog"]) == 0
+        assert func.ladder_length("hit", "cog", ["hot", "dot", "tog", "cog"]) == 0
+        assert func.ladder_length("a", "c", ["a", "b", "c"]) == 2

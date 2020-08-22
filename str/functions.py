@@ -1,6 +1,7 @@
 import collections
+import string
 import sys
-from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping
+from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping, Mapping, Set
 
 from .shortest_prefix_trie import ShortestPrefixTrie
 
@@ -230,3 +231,115 @@ def shortest_unique_prefix(words: Sequence[str]) -> Sequence[str]:
         trie.insert(w)
 
     return [trie.shortest_prefix(w) for w in words]
+
+
+# LeetCode 336.
+# 167. Given a list of words, find all pairs of unique indices such that the concatenation of the two words is a
+# palindrome.
+#
+# For example, given the list ["code", "edoc", "da", "d"], return [(0, 1), (1, 0), (2, 3)].
+#
+# ANSWER: For any two words s1s2 and s3, they can be combined to create a palindrome if:
+#  1. s1 is a palindrome and s3 is the reverse of s2. The palindrome would be s2s1s3.
+#  2. s2 is a palindrome and s3 is the reverse of s1. The palindrome would be s1s2s3.
+#
+# If there are n words of average length k, we go over each character in each word, so time complexity is O(nk).
+def palindrome_pairs(words: Sequence[str]) -> Iterable[Tuple[int, int]]:
+    uniq: Mapping[str, int] = {s: i for i, s in enumerate(words)}
+    pairs: MutableSequence[Tuple[int, int]] = []
+
+    for s, i in uniq.items():
+        for j in range(len(s)):
+            left: str = s[:j]
+            rev_left: str = left[::-1]
+            right: str = s[j:]
+            rev_right: str = right[::-1]
+
+            if left == rev_left and rev_right in uniq.keys() and i != uniq[rev_right]:
+                # left is a palindrome, and reverse of right exists; prepending the reverse of right makes a palindrome
+                if left:
+                    pairs.append((uniq[rev_right], i))
+                # left is empty, and reverse of right exists; appending the reverse of right makes a palindrome
+                else:
+                    pairs.append((i, uniq[rev_right]))
+            if right == rev_right and rev_left in uniq.keys() and i != uniq[rev_left]:
+                # right is a palindrome, and reverse of left exists; appending the reverse of left makes a palindrome
+                pairs.append((i, uniq[rev_left]))
+                # left is empty, and exists among the words, any palindrome can be combined with it
+                if not left:
+                    pairs.append((uniq[rev_left], i))
+
+    return pairs
+
+
+# LeetCode 127.
+# 170. Given a start word, an end word, and a dictionary of valid words, find the shortest transformation sequence
+# from start to end such that only one letter is changed at each step of the sequence, and each transformed word
+# exists in the dictionary. If there is no possible transformation, return null. Each word in the dictionary have
+# the same length as start and end and is lowercase.
+#
+# For example, given start = "dog", end = "cat", and dictionary = {"dot", "dop", "dat", "cat"},
+# return ["dog", "dot", "dat", "cat"].
+#
+# Given start = "dog", end = "cat", and dictionary = {"dot", "tod", "dat", "dar"}, return null as there is no
+# possible transformation from dog to cat.
+#
+# ANSWER: We build an implicit unweighted directed graph where an edge exists from w1 -> w2 if a single letter
+# transformation exists from w1 to w2. Then we run a BFS from the start word looking for the end word.
+# Time complexity: To find the edges for a node, we loop n * 26 times, which for small n, it practically constant.
+# BFS takes O(V+E) time, where V is the number of words, and E is the number of edges.
+def ladder_length(start: str, end: str, words: Sequence[str]) -> int:
+    uniq_words = dict((w, i) for i, w in enumerate(words))
+
+    # assuming all letters are lowercase alphabetic characters
+    def one_apart(word: str) -> Set[int]:
+        ret = set()
+        for i in range(len(end)):
+            for c in string.ascii_lowercase:
+                w = word[:i] + c + word[i + 1:]
+                if w != word and w in uniq_words:
+                    ret.add(uniq_words[w])
+        return ret
+
+    end_idx = -1 if end not in uniq_words else uniq_words[end]
+    if end_idx == -1:
+        return 0
+
+    # https://www.youtube.com/watch?v=KiCBXu4P-2Y
+    def bfs(s: int) -> Tuple[bool, int]:
+        visited: Set[int] = set()
+        queue: Deque[int] = collections.deque()
+        # Start word to s is one move already
+        move_count = 1
+        nodes_in_next_layer = 0
+        nodes_left_in_layer = 1
+        found = False
+
+        queue.append(s)
+        visited.add(s)
+
+        while queue:
+            x = queue.popleft()
+            if x == end_idx:
+                found = True
+                break
+
+            for y in one_apart(words[x]) - visited:
+                nodes_in_next_layer += 1
+                queue.append(y)
+                visited.add(y)
+
+            nodes_left_in_layer -= 1
+            if nodes_left_in_layer == 0:
+                nodes_left_in_layer = nodes_in_next_layer
+                nodes_in_next_layer = 0
+                move_count += 1
+
+        return found, move_count
+
+    moves = sys.maxsize
+    for x in one_apart(start):
+        y = bfs(x)
+        if y[0]:
+            moves = min(moves, y[1])
+    return moves + 1 if moves < sys.maxsize else 0

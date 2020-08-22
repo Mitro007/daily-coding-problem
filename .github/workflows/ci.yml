@@ -1,9 +1,9 @@
-name: Daily Coding Problem
+name: CI
 
 on: [push]
 
 jobs:
-  build:
+  Build:
 
     runs-on: ubuntu-latest
 
@@ -13,7 +13,7 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.8
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt

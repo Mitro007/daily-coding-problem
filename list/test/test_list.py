@@ -1,5 +1,6 @@
 from list import functions as func
 from list.linked_list import LinkedList
+import pytest
 
 
 class TestList:
@@ -38,3 +39,12 @@ class TestList:
         ll = LinkedList.from_iterable(range(1, 5))
         assert list(func.swap_pairs(ll)) == [2, 1, 4, 3]
         assert list(func.swap_pairs(LinkedList(1))) == [1]
+
+    @pytest.mark.parametrize("itr", [
+        [4, 1, -3, 99],
+        [4, 2, 1, 3],
+        [-1, 0, 3, 4, 5]
+    ])
+    def test_sort(self, itr):
+        ll = LinkedList.from_iterable(itr)
+        assert list(func.sort(ll)) == sorted(itr)

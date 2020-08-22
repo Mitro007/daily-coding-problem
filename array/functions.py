@@ -572,3 +572,46 @@ def count_smaller(nums: Sequence[int]) -> Sequence[int]:
 
     sort(list(enumerate(nums)))
     return count
+
+
+# 166. Implement a 2D iterator class. It will be initialized with an array of arrays, and should implement the following
+# methods:
+#
+# next(): returns the next element in the array of arrays. If there are no more elements, raise an exception.
+# has_next(): returns whether or not the iterator still has elements left.
+# For example, given the input [[1, 2], [3], [], [4, 5, 6]], calling next() repeatedly should output 1, 2, 3, 4, 5, 6.
+#
+# Do not use flatten or otherwise clone the arrays. Some of the arrays can be empty.
+
+# LeetCode 48.
+# 168. Given an N by N matrix, rotate it by 90 degrees clockwise.
+#
+# For example, given the following matrix:
+#
+# [[1, 2, 3],
+#  [4, 5, 6],
+#  [7, 8, 9]]
+# you should return:
+#
+# [[7, 4, 1],
+#  [8, 5, 2],
+#  [9, 6, 3]]
+# Follow-up: What if you couldn't use any extra space?
+#
+# ANSWER: Imagine the matrix like an onion with multiple layers. Observe that the number of layers is simply n // 2.
+# The rotation happens layer by layer. At each iteration, we swap 4 elements from the current layer.
+def rotate_matrix(matrix: MutableSequence[MutableSequence[int]]) -> None:
+    n: int = len(matrix)
+    layers: int = n // 2
+
+    for layer in range(layers):
+        for shift in range(layer, n - layer - 1):
+            top_left: int = matrix[layer][shift]
+            top_right: int = matrix[shift][n - layer - 1]
+            bottom_left: int = matrix[n - shift - 1][layer]
+            bottom_right: int = matrix[n - layer - 1][n - shift - 1]
+
+            matrix[layer][shift] = bottom_left
+            matrix[shift][n - layer - 1] = top_left
+            matrix[n - layer - 1][n - shift - 1] = top_right
+            matrix[n - shift - 1][layer] = bottom_right
