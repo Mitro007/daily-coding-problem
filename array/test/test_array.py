@@ -178,3 +178,6 @@ class TestArray:
             [12, 6, 8, 9],
             [16, 7, 10, 11]
         ]
+
+    def test_max_guests(self):
+        assert func.max_guests([(1, 4), (2, 5), (9, 12), (5, 9), (5, 12)]) == (5, 3)

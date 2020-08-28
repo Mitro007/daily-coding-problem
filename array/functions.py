@@ -1,3 +1,4 @@
+import itertools
 import sys
 from typing import Sequence, MutableSequence, TypeVar, List, Tuple, Dict, Iterable, Set
 
@@ -615,3 +616,59 @@ def rotate_matrix(matrix: MutableSequence[MutableSequence[int]]) -> None:
             matrix[shift][n - layer - 1] = top_left
             matrix[n - layer - 1][n - shift - 1] = top_right
             matrix[n - shift - 1][layer] = bottom_right
+
+
+# Consider a big party where a log register for each guest's entry and exit times is maintained. Find the time at which
+# there are maximum guests in the party. Note that entries in register are not in any order.
+
+# For example:
+# [(1, 4), (2, 5), (9, 12), (5, 9), (5, 12)]
+# First guest arrives at 1 and leaves at 4,
+# second guest arrives at 2 and leaves at 5, and so on.
+# There are maximum 3 guests at time 5.
+#
+# ANSWER: The problem boils down to the maximum overlap of the following line segments, where the beginning of a line
+# segment indicates the entry time of a guest, and the end indicates their exit. We can see that three lines overlap
+# at 5, and as well as 9. We will return the first answer.
+# To do this, we convert the register into a list of entry and exit events, and mark an entry by 1, and an exit by -1.
+# Then we sort the events based on the times, and if the times are equal, we put an entry before an exit. For the
+# example above, we get [(1, 1), (2, 1), (4, -1), (5, 1), (5, 1), (5, -1), (9, 1), (9, -1), (12, -1), (12, -1). Then
+# we simply traverse this list adding up the 1's and -1's, keeping track of the maximum value at all times.
+#         ------------------
+#         ---------
+#                 ----------
+#   -------
+# -------
+# 1 2 3 4 5 6 7 8 9 10 11 12
+#
+# Time complexity:
+# Conversion of the register to list of entry and exit events: O(n).
+# Sorting of the events: O(n log(n)).
+# Overall, O(n log(n)).
+#
+# A variation of the problem is as follows:
+# 171. You are given a list of data entries that represent entries and exits of groups of people into a building.
+# An entry looks like this:
+#
+# {"timestamp": 1526579928, count: 3, "type": "enter"}
+#
+# This means 3 people entered the building. An exit looks like this:
+#
+# {"timestamp": 1526580382, count: 2, "type": "exit"}
+#
+# This means that 2 people exited the building. timestamp is in Unix time.
+#
+# Find the busiest period in the building, that is, the time with the most people in the building. Return it as a pair
+# of (start, end) timestamps. You can assume the building always starts off and ends up empty, i.e. with 0 people
+# inside.
+def max_guests(register: Sequence[Tuple[int, int]]) -> Tuple[int, int]:
+    time = num_guests = max_num_guests = 0
+
+    events = map(lambda x: [(x[0], 1), (x[1], -1)], register)
+    for t, c in sorted(itertools.chain.from_iterable(events), key=lambda x: (x[0], -x[1])):
+        num_guests += c
+        if num_guests > max_num_guests:
+            time = t
+            max_num_guests = num_guests
+
+    return time, max_num_guests

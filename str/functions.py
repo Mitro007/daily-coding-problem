@@ -3,6 +3,7 @@ import string
 import sys
 from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping, Mapping, Set
 
+from .aho_corasick import AhoCorasickAutomaton
 from .shortest_prefix_trie import ShortestPrefixTrie
 
 
@@ -343,3 +344,109 @@ def ladder_length(start: str, end: str, words: Sequence[str]) -> int:
         if y[0]:
             moves = min(moves, y[1])
     return moves + 1 if moves < sys.maxsize else 0
+
+
+# LeetCode 30.
+# 172. Given a string 's' and a list of words 'words', where each word is the same length, find all starting indices of
+# substrings in 's' that is a concatenation of every word in 'words' exactly once.
+#
+# For example, given s = "dogcatcatcodecatdog" and words = ["cat", "dog"], return [0, 13], since "dogcat" starts at
+# index 0 and "catdog" starts at index 13.
+#
+# Given s = "barfoobazbitbyte" and words = ["dog", "cat"], return [] since there are no substrings composed of "dog"
+# and "cat" in s.
+def substr_indices(s: str, words: Sequence[str]) -> Sequence[int]:
+    indices = []
+    if not words:
+        return indices
+    m = len(words[0])
+    n = m * len(words)
+
+    for start in range(len(s)):
+        end = start + n
+        if end > len(s):
+            break
+        uniq = collections.Counter(words)
+        for i in range(start, end, m):
+            token = s[i:i + m]
+            uniq[token] -= 1
+            if uniq[token] >= 0:  # Counter returns zero for missing keys
+                if uniq[token] == 0:
+                    del uniq[token]
+                if not uniq:
+                    indices.append(start)
+            else:
+                break
+
+    return indices
+
+
+# Alternative solution to #172 using an Aho-Corasick automaton and a sliding window.
+def substr_indices_2(s: str, words: Sequence[str]) -> Sequence[int]:
+    indices: MutableSequence[int] = []
+    n: int = len(words)
+    m: int = len(words[0]) if n > 0 else 0
+    if not words or m * n > len(s):
+        return indices
+
+    # Create Aho-Corasick automaton, and for each word, store the indices at which it appears in 'words'
+    ac = AhoCorasickAutomaton(words)
+
+    # f[i] = x if s[i:i + m] = words[x]
+    #      = -1 otherwise
+    # In other words, for each i, f[i] is the index of the word in words that starts at s[i].
+    f: MutableSequence[int] = [-1] * len(s)
+    node: AhoCorasickAutomaton.Node = ac.root
+    i = 0
+    freq: MutableMapping[str, int] = collections.defaultdict(int)
+    while i < len(s) and node:
+        if s[i] in node.children:
+            node = node.children[s[i]]
+            i += 1
+        elif node.failure:
+            node = node.failure
+        else:
+            node = ac.root
+            i += 1
+
+        if node.word:
+            f[i - m] = node.val[0]
+            freq[words[node.val[0]]] = len(node.val)
+
+    # Divide 'f' into subarrays, where each subarray is of the form: {f[i], f[i + m], f[i + 2m], ...}.
+    # Each subarray must contain at least n items. Since f[i] represents a match (or not) for a string of length m,
+    # we don't need to check the (m - 1) indices between each f[i] in the subarray. What we are looking for is a
+    # contiguous sequence of length n that is some permutation of numbers from 0 to n, that, in turn, represents
+    # some permutation of the words in 'words'.
+
+    # Indices to the words we have seen so far; when its size is equal to n, a match has been found. By checking its
+    # size, we can determine in constant time if a match has been found without having to scan the 'seen' dict
+    queue: Deque[int] = collections.deque()
+    # seen[i] = number of times we have seen f[i]
+    seen: MutableMapping[int, int] = collections.defaultdict(int)
+    for i in range(len(f) - n * m + 1):
+        # Start new window
+        seen.clear()
+        queue.clear()
+        for j in range((len(f) - i) // m):
+            k: int = i + j * m
+
+            if f[k] != -1:
+                # We have seen the words[f[k]] before
+                while queue and seen[f[k]] >= freq[words[f[k]]]:
+                    x = queue.popleft()
+                    seen[x] -= 1
+
+                queue.append(f[k])
+                seen[f[k]] += 1
+
+                if len(queue) == n:
+                    indices.append(k - (n - 1) * m)
+            else:
+                # Invalidate window, start new
+                seen.clear()
+                queue.clear()
+            # Never check same index twice; this guards against the degenerate case where each pattern is of length 1
+            f[k] = -1
+
+    return indices

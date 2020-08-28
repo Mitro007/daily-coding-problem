@@ -60,3 +60,22 @@ class TestString:
         assert func.ladder_length("hot", "dog", ["hot", "dog"]) == 0
         assert func.ladder_length("hit", "cog", ["hot", "dot", "tog", "cog"]) == 0
         assert func.ladder_length("a", "c", ["a", "b", "c"]) == 2
+
+    @pytest.mark.parametrize("s, words, indices", [
+        ("dogcatcatcodecatdog", ["cat", "dog"], [0, 13]),
+        ("barfoothefoobarman", ["foo", "bar"], [0, 9]),
+        ("wordgoodgoodgoodbestword", ["word", "good", "best", "word"], []),
+        ("barfoobazbitbyte", ["dog", "cat"], []),
+        ("barfoofoobarthefoobarman", ["bar", "foo", "the"], [6, 9, 12]),
+        ("aaa", ["a", "a"], [0, 1]),
+        ("aaa", ["aa", "aa"], []),
+        ("", [], []),
+        ("aaaaaa", ["aaa", "aaa"], [0]),
+        ("aaaaaaaa", ["aa", "aa", "aa"], [0, 1, 2]),
+        ("abaababbaba", ["ba", "ab", "ab"], [1, 3]),
+        ("cbaacacbaa", ["cb", "aa"], [0, 6]),
+        ("aaabbbc", ["a", "a", "b", "b", "c"], [])
+    ])
+    def test_substr_indices(self, s, words, indices):
+        assert set(func.substr_indices(s, words)) == set(indices)
+        assert set(func.substr_indices_2(s, words)) == set(indices)

@@ -1,5 +1,5 @@
 import random
-from typing import Sequence
+from typing import Sequence, Mapping
 
 
 # LeetCode 69.
@@ -31,3 +31,39 @@ def square_root(n: int, tolerance: float) -> float:
 # the resultant list.
 def choose_with_probability(nums: Sequence[int], probabilities: Sequence[float]) -> int:
     return random.choice([j for i in range(len(nums)) for j in [i] * int(10 * probabilities[i])])
+
+
+# 175. You are given a starting state start, a list of transition probabilities for a Markov chain, and a number of
+# steps num_steps. Run the Markov chain starting from start for num_steps and compute the number of times we visited
+# each state.
+#
+# For example, given the starting state a, number of steps 5000, and the following transition probabilities:
+#
+# [
+#   ('a', 'a', 0.9),
+#   ('a', 'b', 0.075),
+#   ('a', 'c', 0.025),
+#   ('b', 'a', 0.15),
+#   ('b', 'b', 0.8),
+#   ('b', 'c', 0.05),
+#   ('c', 'a', 0.25),
+#   ('c', 'b', 0.25),
+#   ('c', 'c', 0.5)
+# ]
+# One instance of running this Markov chain might produce { 'a': 3012, 'b': 1656, 'c': 332 }.
+#
+# See https://www.datacamp.com/community/tutorials/markov-chains-python-tutorial
+def markov(start: str, transitions: Mapping[str, Mapping[str, float]], steps: int) -> Mapping[str, int]:
+    for state, tr in transitions.items():
+        assert sum(tr.values()) == 1.0, "Transition probabilities from state: {state} don't add up to 1"
+
+    freq = dict(map(lambda k: (k, 0), transitions.keys()))
+    choice: Sequence[str] = [start]
+    for i in range(steps):
+        tr = transitions[choice[0]]
+        # https://docs.python.org/dev/library/random.html#random.choices
+        # Returns a list, for us, k = 1, so it's a singleton list
+        choice = random.choices(population=list(tr.keys()), weights=list(tr.values()))
+        freq[choice[0]] += 1
+
+    return freq
