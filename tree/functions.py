@@ -1,7 +1,8 @@
+import bisect
 import collections
 import operator
 import sys
-from typing import TypeVar, Dict, Callable, Tuple, Set, MutableMapping, Iterable, Deque
+from typing import TypeVar, Dict, Callable, Tuple, Set, MutableMapping, Iterable, Deque, Sequence, Mapping
 
 from tree.binary_tree import BinaryTree
 
@@ -264,3 +265,120 @@ def longest_path(edges: Iterable[Tuple[str, str, int]]) -> int:
     bfs()
 
     return max(dist.values())
+
+
+# 179. Given the sequence of keys visited by a postorder traversal of a binary search tree, reconstruct the tree.
+#
+# For example, given the sequence 2, 4, 3, 8, 7, 5, you should construct the following tree:
+#
+#     5
+#    / \
+#   3   7
+#  / \   \
+# 2   4   8
+#
+# ANSWER:
+# Take the last element in the input array. This is the root.
+# Loop over the remaining array from the end looking for the point where the elements change from being smaller than
+# the root (left subtree) to being bigger (right subtree). Split the input array at that point. This can also be done
+# with a binary search.
+# Recursively reconstruct the left and right subtrees from those two sub-arrays.
+#
+# Time complexity: At each step, binary search takes log(n) time, and we reduce the problem by one element (the root).
+# Thus, overall time complexity is nlog(n).
+def from_postorder(nodes: Sequence[int]) -> BinaryTree[int]:
+    def build_subtree(subtree_nodes: Sequence[int]) -> BinaryTree[int]:
+        if not subtree_nodes:
+            return None
+
+        n = len(subtree_nodes)
+        # Locates the insertion point for x to maintain sorted order. This is the first element greater than root.
+        x = bisect.bisect_left(subtree_nodes, subtree_nodes[-1], hi=n - 1)
+
+        root = BinaryTree(subtree_nodes[-1])
+        root.left = build_subtree(subtree_nodes[:x])
+        # slice returns empty list if end is <= start
+        root.right = build_subtree(subtree_nodes[x:n - 1])
+
+        return root
+
+    return build_subtree(nodes)
+
+
+# Alternative solution to #179.
+# We create two data structures, one the inorder traversal of the BST, and the other a mapping for each node to its
+# index in the postorder traversal sequence.
+#
+# For a given range of nodes that form a subtree, the root is the one that appears last in the postorder traversal.
+# To find the root efficiently, we map each node to its index using the mapping created before, and then find the
+# max.
+#
+# Having found the root, we do a binary search in the inorder traversal sequence; elements from the lower bound of the
+# given range to the left of the root form its left subtree, and elements from the right of the root to the right bound
+# of the range form its right subtree. We recurse on the left and right subtrees.
+#
+# Put differently, we use the postorder traversal sequence to find the root, and the inorder traversal sequence to
+# find the left and the right subtrees.
+#
+# Time complexity:
+# At each step, finding the root takes O(n) time. Binary search takes log(n) time. We also divide the problem into two
+# roughly equal subproblems (worst case for full BST). Thus, T(n) <= 2 . T(n/2) + O(n) + log(n) = T(n/2) + O(n),
+# which gives us O(n log(n)) using the Master theorem.
+def from_postorder_2(nodes: Sequence[int]) -> BinaryTree[int]:
+    inorder: Sequence[int] = sorted(nodes)
+    index_map: Mapping[int, int] = dict([(x, i) for i, x in enumerate(nodes)])
+
+    # The indices refer to the inorder traversal sequence
+    def build_subtree(lo: int, hi: int) -> BinaryTree[int]:
+        if hi <= lo:
+            return None
+        elif hi - lo == 1:
+            return BinaryTree(inorder[lo])
+
+        root = max(map(lambda i: index_map[inorder[i]], range(lo, hi)))
+        root_node = BinaryTree(nodes[root])
+        x = bisect.bisect_left(inorder, root_node.val, lo, hi)
+        root_node.left = build_subtree(lo, x)
+        root_node.right = build_subtree(x + 1, hi)
+
+        return root_node
+
+    return build_subtree(0, len(nodes))
+
+
+# LeetCode 106.
+# Given inorder and postorder traversal of a tree, construct the binary tree.
+#
+# Note:
+# You may assume that duplicates do not exist in the tree.
+#
+# For example, given
+#
+# inorder = [9,3,15,20,7]
+# postorder = [9,15,7,20,3]
+# Return the following binary tree:
+#
+#     3
+#    / \
+#   9  20
+#     /  \
+#    15   7
+def from_postorder_and_inorder(postorder: Sequence[int], inorder: Sequence[int]) -> BinaryTree[int]:
+    post_map = dict((x, i) for i, x in enumerate(postorder))
+    in_map = dict((x, i) for i, x in enumerate(inorder))
+
+    def build_subtree(lo: int, hi: int) -> BinaryTree[int]:
+        if hi <= lo:
+            return None
+        elif hi - lo == 1:
+            return BinaryTree(inorder[lo])
+
+        root = max(map(lambda i: post_map[inorder[i]], range(lo, hi)))
+        root_node = BinaryTree(postorder[root])
+        x = in_map[postorder[root]]
+        root_node.left = build_subtree(lo, x)
+        root_node.right = build_subtree(x + 1, hi)
+
+        return root_node
+
+    return build_subtree(0, len(postorder))

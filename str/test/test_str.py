@@ -79,3 +79,10 @@ class TestString:
     def test_substr_indices(self, s, words, indices):
         assert set(func.substr_indices(s, words)) == set(indices)
         assert set(func.substr_indices_2(s, words)) == set(indices)
+
+    def test_is_isomorphic(self):
+        assert func.is_isomorphic("egg", "add")
+        assert not func.is_isomorphic("foo", "bar")
+        assert func.is_isomorphic("paper", "title")
+        assert func.is_isomorphic("abc", "bcd")
+        assert not func.is_isomorphic("aba", "baa")

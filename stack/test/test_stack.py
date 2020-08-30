@@ -1,5 +1,5 @@
 import pytest
-
+import collections
 from stack import functions as func
 
 
@@ -47,3 +47,7 @@ class TestStack:
         assert func.eval_rpn(["4", "13", "5", "/", "+"]) == 6
         assert func.eval_rpn(["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]) == 22
         assert func.eval_rpn([15, 7, 1, 1, '+', '-', '/', 3, '*', 2, 1, 1, '+', '+', '-']) == 5
+
+    def test_interleave(self):
+        assert all(x == y for x, y in zip(func.interleave(collections.deque(range(1, 6))), [1, 5, 2, 4, 3]))
+        assert all(x == y for x, y in zip(func.interleave(collections.deque(range(1, 5))), [1, 4, 2, 3]))

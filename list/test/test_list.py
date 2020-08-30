@@ -1,6 +1,7 @@
+import pytest
+
 from list import functions as func
 from list.linked_list import LinkedList
-import pytest
 
 
 class TestList:
@@ -48,3 +49,14 @@ class TestList:
     def test_sort(self, itr):
         ll = LinkedList.from_iterable(itr)
         assert list(func.sort(ll)) == sorted(itr)
+
+    @pytest.mark.parametrize("before, after, k", [
+        ([1, 2, 3, 4, 5], [4, 5, 1, 2, 3], 2),
+        ([0, 1, 2], [2, 0, 1], 4),
+        ([7, 7, 3, 5], [3, 5, 7, 7], 2),
+        ([1, 2, 3, 4, 5], [3, 4, 5, 1, 2], 3),
+        ([1], [1], 0),
+        ([1, 2], [1, 2], 0)
+    ])
+    def test_rotate_right(self, before, after, k):
+        assert list(func.rotate_right(LinkedList.from_iterable(before), k)) == after

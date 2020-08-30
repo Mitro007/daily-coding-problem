@@ -1,3 +1,5 @@
+import pytest
+
 import tree.functions as func
 from tree.binary_tree import BinaryTree
 
@@ -70,3 +72,16 @@ class TestTree:
             ("d", "e", 2), ("d", "f", 4),
             ("e", "g", 1), ("e", "h", 1)
         ]) == 17
+
+    @pytest.mark.parametrize("nodes", [
+        [2, 4, 3, 8, 7, 5],
+        [5, 17, 19, 18, 16, 70, 85, 60, 20]
+    ])
+    def test_from_postorder(self, nodes):
+        assert (list(func.from_postorder(nodes))) == sorted(nodes)
+        assert (list(func.from_postorder_2(nodes))) == sorted(nodes)
+
+    def test_from_postorder_and_inorder(self):
+        postorder = [9, 15, 7, 20, 3]
+        inorder = [9, 3, 15, 20, 7]
+        assert list(func.from_postorder_and_inorder(postorder, inorder)) == inorder

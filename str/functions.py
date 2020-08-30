@@ -450,3 +450,21 @@ def substr_indices_2(s: str, words: Sequence[str]) -> Sequence[int]:
             f[k] = -1
 
     return indices
+
+
+# LeetCode 205.
+# 176. Determine whether there exists a one-to-one character mapping from one string s1 to another s2.
+# For example, given s1 = abc and s2 = bcd, return true since we can map a to b, b to c, and c to d.
+# Given s1 = foo and s2 = bar, return false since the o cannot map to two characters.
+def is_isomorphic(s: str, t: str) -> bool:
+    if len(s) != len(t):
+        return False
+
+    c1: Mapping[str, Set[int]] = collections.defaultdict(set)
+    c2: Mapping[str, Set[int]] = collections.defaultdict(set)
+
+    for i in range(len(s)):
+        c1[s[i]].add(i)
+        c2[t[i]].add(i)
+
+    return len(c1) == len(c2) and all(c1[k1] == c2[k2] for k1, k2 in zip(c1.keys(), c2.keys()))

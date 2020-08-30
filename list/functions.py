@@ -150,6 +150,10 @@ def swap_pairs(head: LinkedList[T]) -> LinkedList[T]:
 # 169. Given a linked list, sort it in O(n log n) time and constant space.
 #
 # For example, the linked list 4 -> 1 -> -3 -> 99 should become -3 -> 1 -> 4 -> 99.
+#
+# Time Complexity: We iterate the lists of size n, n/2, ..., at each step to find the middle element. We also merge
+# two sorted lists of same size, which is O(n). Using the Master theorem, T(n) <= a.T(n/b) + O(n^d), a=b=2, d=1.
+# This is the case a = b^d, which gives the answer T(n) <= O(n^d log n)=O(n log n).
 def sort(linked_list: LinkedList[int]) -> LinkedList[int]:
     # Return n // 2 element
     def middle(head: LinkedList[int]) -> LinkedList[int]:
@@ -192,12 +196,49 @@ def sort(linked_list: LinkedList[int]) -> LinkedList[int]:
     def merge_sort(head: LinkedList[int]) -> LinkedList[int]:
         if head and head.next:
             mid = middle(head)
-            mid_next = mid.next
+            next_to_mid = mid.next
             # Makes it easier to stop
             mid.next = None
 
-            return merge(merge_sort(head), merge_sort(mid_next))
+            return merge(merge_sort(head), merge_sort(next_to_mid))
         else:
             return head
 
     return merge_sort(linked_list)
+
+
+# LeetCode 61.
+# 177. Given a linked list and a positive integer k, rotate the list to the right by k places.
+# For example, given the linked list 7 -> 7 -> 3 -> 5 and k = 2, it should become 3 -> 5 -> 7 -> 7.
+# Given the linked list 1 -> 2 -> 3 -> 4 -> 5 and k = 3, it should become 3 -> 4 -> 5 -> 1 -> 2.
+#
+# Time complexity: O(n).
+def rotate_right(head: LinkedList[int], k: int) -> LinkedList[int]:
+    length: int = 0
+    node: LinkedList[int] = head
+
+    while node:
+        node = node.next
+        length += 1
+
+    if length <= 1:
+        return head
+
+    n = k % length
+
+    if n == 0:
+        return head
+
+    node = head
+    for _ in range(length - n - 1):
+        node = node.next
+
+    new_head = node.next
+    node.next = None
+    node = new_head
+    while node and node.next:
+        node = node.next
+    if node:
+        node.next = head
+
+    return new_head

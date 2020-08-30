@@ -1,5 +1,6 @@
+import collections
 import operator
-from typing import Sequence, MutableSequence, Tuple, Iterable, Mapping, Callable, List
+from typing import Sequence, MutableSequence, Tuple, Iterable, Mapping, Callable, List, Deque
 
 
 # LeetCode 56.
@@ -166,3 +167,59 @@ def eval_rpn(tokens: List[str]) -> int:
             operand_stack.append(result)
 
     return operand_stack.pop()
+
+
+# 180. Given a stack of N elements, interleave the first half of the stack with the second half reversed using only one
+# other queue. This should be done in-place.
+#
+# Recall that you can only push or pop from a stack, and enqueue or dequeue from a queue.
+#
+# For example, if the stack is [1, 2, 3, 4, 5], it should become [1, 5, 2, 4, 3]. If the stack is [1, 2, 3, 4],
+# it should become [1, 4, 2, 3].
+#
+# Hint: Try working backwards from the end state.
+#
+# ANSWER: At each iteration, we transfer all elements between the first and the last from the stack to the queue.
+# We then push the first and the last elements back to the stack, and transfer all the elements from the queue back
+# to the stack. Since this reverses the input order of the elements, we need to also reverse the order in which the
+# first and the last elements are inserted in the stack at each iteration.
+# At each iteration, two elements are put in their goal position; we repeat the above process with the remaining
+# elements.
+# At the end, the stack contains the elements in the reverse order of what we want. We transfer them to the queue,
+# which gives us the desired answer.
+#
+# Time complexity: We reduce the problem size by 2 at each iteration, and there are n // 2 iteration.
+# The number of stack and queue operations at each iteration is given by (n - i), where 0 <= i < n // 2.
+# = n * n // 2 - (1 + 2 + ... + n // 2 - 1)
+# = n * n // 2 - (n // 2 - 1) * (n // 2) / 2
+# = O(n^2)
+def interleave(stack: Deque[int]) -> Sequence[int]:
+    queue: Deque[int] = collections.deque()
+    n = len(stack)
+
+    for i in range(n // 2):
+        first = None
+        last = None
+        for j in range(i, n - i):
+            x = stack.popleft()
+            if j == i:
+                first = x
+            elif j == n - i - 1:
+                last = x
+            else:
+                queue.append(x)
+
+        if i % 2 == 0:
+            stack.appendleft(first)
+            stack.appendleft(last)
+        else:
+            stack.appendleft(last)
+            stack.appendleft(first)
+
+        while queue:
+            stack.appendleft(queue.popleft())
+
+    while stack:
+        queue.append(stack.pop())
+
+    return queue
