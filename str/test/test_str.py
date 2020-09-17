@@ -86,3 +86,17 @@ class TestString:
         assert func.is_isomorphic("paper", "title")
         assert func.is_isomorphic("abc", "bcd")
         assert not func.is_isomorphic("aba", "baa")
+
+    def test_palindrome_substr(self):
+        assert func.palindrome_substr("abcd") == [['a', 'b', 'c', 'd']]
+        assert func.palindrome_substr("aab") == [["a", "a", "b"], ["aa", "b"]]
+        assert func.palindrome_substr("abc") == [["a", "b", "c"]]
+        assert func.palindrome_substr("a") == [["a"]]
+        assert func.palindrome_substr("bb") == [["b", "b"], ["bb"]]
+
+    def test_palindrome_substr_min_cut(self):
+        assert func.palindrome_substr_min_cut("abcbabcb") == 1
+        assert func.palindrome_substr_min_cut("aab") == 1
+        assert func.palindrome_substr_min_cut("a") == 0
+        assert func.palindrome_substr_min_cut("ab") == 1
+        assert func.palindrome_substr_min_cut("aaabaa") == 1

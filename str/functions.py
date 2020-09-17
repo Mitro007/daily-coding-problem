@@ -1,7 +1,8 @@
 import collections
+import heapq
 import string
 import sys
-from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping, Mapping, Set
+from typing import MutableSequence, Tuple, Deque, Iterable, Counter, Sequence, MutableMapping, Mapping, Set, List
 
 from .aho_corasick import AhoCorasickAutomaton
 from .shortest_prefix_trie import ShortestPrefixTrie
@@ -468,3 +469,122 @@ def is_isomorphic(s: str, t: str) -> bool:
         c2[t[i]].add(i)
 
     return len(c1) == len(c2) and all(c1[k1] == c2[k2] for k1, k2 in zip(c1.keys(), c2.keys()))
+
+
+# LeetCode 131.
+# Given a string s, partition s such that every substring of the partition is a palindrome.
+# Return all possible palindrome partitioning of s.
+#
+# Example:
+#
+# Input: "aab"
+# Output:
+# [
+#   ["aa","b"],
+#   ["a","a","b"]
+# ]
+def palindrome_substr(s: str) -> MutableSequence[MutableSequence[str]]:
+    seen = {}
+
+    def helper(s1: str) -> List[List[str]]:
+        # return solution if stored
+        if s1 in seen:
+            return seen[s1]
+
+        out = []
+
+        for i in range(1, len(s1) + 1):
+            part = s1[:i]
+
+            # if substring is a palindrome, recurse
+            if part == part[::-1]:
+                # get palindrome partitions for rest of string
+                rest = helper(s1[i:])
+                # populate output array with palindrome partitions
+                for r in rest:
+                    # list concatenation
+                    out.append([part] + r)
+                if not rest:
+                    out.append([part])
+
+        # store subproblem solution
+        seen[s1] = out
+
+        return out
+
+    return helper(s)
+
+
+# LeetCode 132.
+# 181. Given a string, split it into as few strings as possible such that each string is a palindrome.
+#
+# For example, given the input string racecarannakayak, return ["racecar", "anna", "kayak"].
+#
+# Given the input string abc, return ["a", "b", "c"].
+#
+# ANSWER: We first find all palindromes in string s. This forms a graph where the vertices are the start indices, and
+# the edges are the length of the palindromes. Then we run BFS on this graph, visiting the neighbor first that has the
+# longest palindrome. We make this greedy choice based on the common sense that we will need fewer cuts if we can cover
+# more ground by following a longer edge.
+#
+# Alternative solution:
+# If s1 is a palindrome, no cuts are necessary; else we cut at each index, and calculate the min of all using
+# dynamic programming. The problem exhibits the following characteristics:
+#   Overlapping subproblems: Either or both of the left or right substrings could have been seen before.
+#   Optimal substructure: Num cuts is one more than the sum of the min num of cuts of the left and the right
+#   substrings. For example, consider string "aabc" cut into "aa" and "bc". Since "aa" is a palindrome, its
+#   min num of cuts is zero; "bc" can further be cut into "b" and "c", each of which are palindromes. Thus,
+#   min num of cuts for "bc" is one, and hence, min num of cuts for "aabc" is 0 + 1 + 1 = 2.
+#
+# Time complexity:
+#   Note that for 1 <= i <= n, there are n - i - 1 possible substrings.
+#   Thus, finding all palindromes takes n - 1 + n - 2 + ... + 1 time, which is O(n^2).
+#   BFS takes O(n) time in the worst case when all characters are distinct. Each heap operation takes O(log n) time.
+#   Overall time complexity: O(n^2) + O(n log n) = O(n^2).
+def palindrome_substr_min_cut(s: str) -> int:
+    graph: MutableMapping[int, MutableSequence[int]] = dict()
+    palindromes: Set[Tuple[int, int]] = set()
+    n = len(s)
+    for i in range(n):
+        graph[i] = [i + 1]
+        palindromes.add((i, i + 1))
+
+    def is_palindrome(start: int, end: int) -> bool:
+        return s[start] == s[end] and (end - start == 1 or (start + 1, end) in palindromes)  # noqa: F821
+
+    # Find all palindromes of length i, 2 <= i <= n
+    for length in range(2, n + 1):
+        for start in range(n - length + 1):
+            end = start + length - 1
+
+            if is_palindrome(start, end):
+                graph[start].append(end + 1)
+                palindromes.add((start, end + 1))
+
+    del palindromes
+
+    queue: List[Tuple[int, int, int, int]] = [(0, graph[0][-1], 0, -1)]
+    seen: Set[int] = set()
+    parents: MutableMapping[int, int] = dict()
+
+    while queue:
+        x = heapq.heappop(queue)
+        depth, i, parent = x[0], -x[2], x[3]
+        seen.add(i)
+        parents[i] = parent
+        if i == n:
+            break
+
+        unseen_neighbors = filter(lambda k: k not in seen, graph[i])
+        for j in unseen_neighbors:
+            k = graph[j][-1] if j in graph else j
+            heapq.heappush(queue, (depth + 1, -k, -j, i))
+
+    tokens: Deque[str] = collections.deque()
+    i: int = n
+
+    while i > 0:
+        tokens.appendleft(s[parents[i]:i])
+        i = parents[i]
+
+    return len(tokens) - 1

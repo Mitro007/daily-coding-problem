@@ -1,6 +1,6 @@
 from collections import deque, defaultdict
 from enum import Enum, auto
-from typing import Sequence, Tuple, Set, Iterable, Deque, Dict, MutableSequence, DefaultDict
+from typing import Sequence, Tuple, Set, Iterable, Deque, Dict, MutableSequence, DefaultDict, Mapping
 
 
 # 23. You are given an M by N matrix consisting of booleans that represents a board. Each True boolean represents a
@@ -152,3 +152,23 @@ def has_word(board: Sequence[Sequence[str]], word: str) -> bool:
                 return True
 
     return False
+
+
+# 182. A graph is minimally-connected if it is connected and there is no edge that can be removed while still leaving
+# the graph connected. For example, any binary tree is minimally-connected.
+#
+# Given an undirected graph, check if the graph is minimally-connected. You can choose to represent the graph as either
+# an adjacency matrix or adjacency list.
+#
+# ANSWER: If the graph is minimally-connected. there are no cycles. We launch a DFS from any vertex, and in the process,
+# if we come across a vertex that's already been visited, we have a cycle, and thus, the graph is not
+# minimally-connected.
+#
+# Time complexity: O(V+E).
+def is_minimally_connected(graph: Mapping[int, Sequence[int]]) -> bool:
+    visited: Set[int] = set()
+
+    def dfs(v: int, parent: int) -> bool:
+        return visited.add(v) and all(map(lambda u: dfs(u, v), filter(lambda x: x != parent, graph[v])))
+
+    return dfs(next(iter(graph.keys())), None)

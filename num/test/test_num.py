@@ -15,3 +15,8 @@ class TestNum:
             "c": {"a": 0.25, "b": 0.25, "c": 0.50}
         }, 100)
         assert sum(freq.values()) == 100
+
+    def test_gcd(self):
+        assert func.gcd([1]) == 1
+        assert func.gcd([1071, 462]) == 21
+        assert func.gcd([42, 56, 14]) == 14

@@ -1,3 +1,4 @@
+import functools
 import random
 from typing import Sequence, Mapping
 
@@ -67,3 +68,24 @@ def markov(start: str, transitions: Mapping[str, Mapping[str, float]], steps: in
         freq[choice[0]] += 1
 
     return freq
+
+
+# 184. Given n numbers, find the greatest common denominator between them.
+# For example, given the numbers [42, 56, 14], return 14.
+#
+# ANSWER: We use Euclidean algorithm. https://en.wikipedia.org/wiki/Euclidean_algorithm
+# Replace the larger of the two numbers by its remainder when divided by the smaller of the two. Stop when remainder
+# is zero.
+# Noting gcd(a, b, c) = gcd(a, gcd(b, c)), we simply reduce the array using the gcd of two numbers.
+#
+# Time complexity for gcd of two numbers: 5 * O(k), where k is the number of digits in the smaller number = O(k)
+# Time complexity for gcd of all numbers: O(nk), where k is the average number of digits.
+def gcd(nums: Sequence[int]) -> int:
+    def gcd(a: int, b: int) -> int:
+        if a == 0:
+            return b
+        larger = max(a, b)
+        smaller = min(a, b)
+        return gcd(larger % smaller, smaller)
+
+    return functools.reduce(gcd, nums, 0)

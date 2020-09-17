@@ -672,3 +672,45 @@ def max_guests(register: Sequence[Tuple[int, int]]) -> Tuple[int, int]:
             max_num_guests = num_guests
 
     return time, max_num_guests
+
+
+# LeetCode 836.
+# 185. Given two rectangles on a 2D graph, return the area of their intersection. If the rectangles don't intersect,
+# return 0.
+#
+# For example, given the following rectangles:
+#
+# {
+#     "top_left": (1, 4),
+#     "dimensions": (3, 3) # width, height
+# }
+# and
+#
+# {
+#     "top_left": (0, 5),
+#     "dimensions": (4, 3) # width, height
+# }
+# return 6.
+#
+# ANSWER: Refer to the diagram "test/rectangles.jpg" for some examples.
+# Every rectangle has two unique x coordinates, and two unique y coordinates. In order for the rectangles to
+# intersect, at least one x coordinate of a rectangle must be within the x coordinates of the other one (both x
+# coordinates of the first may be within the x coordinates of the other one if the first one is completely contained
+# in the second one). Thus, if all the x coordinates are sorted, the middle two give us the x-range of the intersection.
+# Same argument applies to y coordinates.
+# Note that if the rectangles don't intersect but have sides that touch, the intersecting range is zero.
+def area_of_overlap(r1: Tuple[Tuple[int, int], Tuple[int, int]], r2: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
+    # r1 bottom left
+    r1x1, r1y1 = r1[0]
+    # r1 top right
+    r1x2, r1y2 = r1x1 + r1[1][0], r1y1 + r1[1][1]
+    # r2 bottom left
+    r2x1, r2y1 = r2[0]
+    # r2 top right
+    r2x2, r2y2 = r2x1 + r2[1][0], r2y1 + r2[1][1]
+
+    x: Sequence[Tuple[int, str]] = sorted([(r1x1, "r1"), (r1x2, "r1"), (r2x1, "r2"), (r2x2, "r2")])
+    y: Sequence[Tuple[int, str]] = sorted([(r1y1, "r1"), (r1y2, "r1"), (r2y1, "r2"), (r2y2, "r2")])
+    if x[0][1] == x[1][1] or x[2][1] == x[3][1] or y[0][1] == y[1][1] or y[2][1] == y[3][1]:
+        return 0
+    return (x[2][0] - x[1][0]) * (y[2][0] - y[1][0])

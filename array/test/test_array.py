@@ -181,3 +181,10 @@ class TestArray:
 
     def test_max_guests(self):
         assert func.max_guests([(1, 4), (2, 5), (9, 12), (5, 9), (5, 12)]) == (5, 3)
+
+    def test_area_of_overlap(self):
+        assert func.area_of_overlap(((1, 4), (3, 3)), ((0, 5), (4, 3))) == 6
+        assert func.area_of_overlap(((0, 0), (2, 2)), ((1, 1), (2, 2))) == 1
+        assert func.area_of_overlap(((0, 0), (3, 2)), ((1, 0), (1, 1))) == 1
+        assert func.area_of_overlap(((0, 0), (1, 1)), ((1, 0), (1, 1))) == 0
+        assert func.area_of_overlap(((4, 0), (2, 6)), ((-5, -3), (9, 5))) == 0
