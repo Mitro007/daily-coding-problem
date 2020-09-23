@@ -197,3 +197,38 @@ Java has bundled a truststore called `cacerts` and it resides in the `$JAVA_HOME
 
 Here, we can override the default truststore location via the `javax.net.ssl.trustStore` property. Similarly, we can 
 set `javax.net.ssl.trustStorePassword` and `javax.net.ssl.trustStoreType` to specify the truststore's password and type.
+
+>     188. What will this code print out?
+
+```
+def make_functions():
+    flist = []
+
+    for i in [1, 2, 3]:
+        def print_i():
+            print(i)
+        flist.append(print_i)
+
+    return flist
+
+functions = make_functions()
+for f in functions:
+    f()
+```
+>     How can we make it print out what we apparently want?
+
+The given code prints `3` three times. It's because Python `for` loop variables are in scope even after exiting the loop,
+so when `print_i` executes, it sees the last value of `i`, which is `3`.
+
+No one knows "what we apparently want", but assuming we want to print `1, 2, 3`, we can define `def print_i(i=i)` such
+that we are appending 3 different `print_i` functions, each with its own default value, which is the value of `i` at 
+that moment in the `for` loop.
+Another way would be as follows:
+```
+for i in [1, 2, 3]:
+    def print_i_factory(i):
+        def print_i():
+            print(i)
+        return print_i
+    flist.append(print_i_factory(i))
+```

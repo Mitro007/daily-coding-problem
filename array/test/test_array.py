@@ -188,3 +188,16 @@ class TestArray:
         assert func.area_of_overlap(((0, 0), (3, 2)), ((1, 0), (1, 1))) == 1
         assert func.area_of_overlap(((0, 0), (1, 1)), ((1, 0), (1, 1))) == 0
         assert func.area_of_overlap(((4, 0), (2, 6)), ((-5, -3), (9, 5))) == 0
+
+    def test_longest_distinct_subarray(self):
+        assert func.longest_distinct_subarray([5, 1, 3, 5, 2, 3, 4, 1]) == 5
+
+    def test_max_sum_circular_arr(self):
+        assert func.max_sum_circular_arr([1, -2, 3, -2]) == 3
+        assert func.max_sum_circular_arr([5, -3, 5]) == 10
+        assert func.max_sum_circular_arr([3, -1, 2, -1]) == 4
+        assert func.max_sum_circular_arr([3, -2, 2, -3]) == 3
+        assert func.max_sum_circular_arr([-2, -3, -1]) == -1
+        assert func.max_sum_circular_arr([-5, 3, 5]) == 8
+        assert func.max_sum_circular_arr([8, 1, -5, -1, 9, -6]) == 12
+        assert func.max_sum_circular_arr([-5, 4, -6]) == 4

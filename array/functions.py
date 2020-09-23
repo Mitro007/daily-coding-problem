@@ -1,6 +1,6 @@
 import itertools
 import sys
-from typing import Sequence, MutableSequence, TypeVar, List, Tuple, Dict, Iterable, Set
+from typing import Sequence, MutableSequence, TypeVar, List, Tuple, Dict, Iterable, Set, MutableMapping
 
 import stack.functions as stack
 
@@ -170,14 +170,15 @@ def count_inversions(nums: Sequence[int]) -> int:
 # subproblems (recomputing the same values over and over). Thus, it may not strictly be called dynamic programming.
 #
 def max_subarray_sum(nums: Sequence[int]) -> int:
-    best: int = -sys.maxsize + 1
-    dp: MutableSequence[int] = [best] * len(nums)
-    dp[0] = nums[0]
+    running_sum = -sys.maxsize + 1
+    max_sum = 0
 
-    for i in range(1, len(nums)):
-        dp[i] = max(dp[i - 1] + nums[i], nums[i])
+    for i in nums:
+        # If running_sum is negative, we are better off taking just the current number
+        running_sum = max(0, running_sum) + i
+        max_sum = max(max_sum, running_sum)
 
-    return max(0, max(dp))
+    return max_sum
 
 
 # LeetCode 33.
@@ -674,7 +675,7 @@ def max_guests(register: Sequence[Tuple[int, int]]) -> Tuple[int, int]:
     return time, max_num_guests
 
 
-# LeetCode 836.
+# LeetCode 223/836.
 # 185. Given two rectangles on a 2D graph, return the area of their intersection. If the rectangles don't intersect,
 # return 0.
 #
@@ -714,3 +715,73 @@ def area_of_overlap(r1: Tuple[Tuple[int, int], Tuple[int, int]], r2: Tuple[Tuple
     if x[0][1] == x[1][1] or x[2][1] == x[3][1] or y[0][1] == y[1][1] or y[2][1] == y[3][1]:
         return 0
     return (x[2][0] - x[1][0]) * (y[2][0] - y[1][0])
+
+
+# LeetCode 3.
+# 189. Given an array of elements, return the length of the longest subarray where all its elements are distinct.
+#
+# For example, given the array [5, 1, 3, 5, 2, 3, 4, 1], return 5 as the longest subarray of distinct elements is
+# [5, 2, 3, 4, 1].
+#
+# ANSWER: We solve this by using a sliding window that contains only distinct numbers. At each iteration, we extend
+# the window on the right; if the current element is one that is already present in the window, we move the left
+# boundary past the duplicate element. The longest distinct subarray is the longest of all the subarrays we see.
+#
+# Time complexity: O(n), since all the operations at each iteration are constant time.
+def longest_distinct_subarray(nums: Sequence[int]) -> int:
+    start: int = 0
+    max_window_length: int = -1
+    uniq: MutableMapping[int, int] = dict()
+
+    for end in range(len(nums)):
+        current = nums[end]
+        if current in uniq and start <= uniq[current]:
+            start = uniq[current] + 1
+        uniq[current] = end
+        running_window_length = end - start + 1
+        max_window_length = max(max_window_length, running_window_length)
+
+    return max_window_length
+
+
+# LeetCode 918.
+# 190. Given a circular array, compute its maximum subarray sum in O(n) time. A subarray can be empty, and in this
+# case the sum is 0.
+#
+# For example, given [8, -1, 3, 4], return 15 as we choose the numbers 3, 4, and 8 where the 8 is obtained from
+# wrapping around.
+#
+# Given [-4, 5, 1, 0], return 6 as we choose the numbers 5 and 1.
+#
+# ANSWER: For an array A of length N, there are two cases of the maximum subarray:
+#   1. The maximum subarray lies between 0 <= i < N
+#   2. The maximum subarray wraps around, so part of it k < i < N, and the rest 0 <= j <= k, for some k.
+#
+#   In the second case, if the total sum of A is S, and the maximum subarray sum is S1, then the sum of the subarray
+#   between k and i is given by S2 = S - S1. Or, S1 = S - S2. Since S is fixed, S1 is maximized if S2 is minimized.
+#
+#   Thus, we find the maximum subarray sum for case 1, and the minimum subarray sum for case 2, using Kadane's
+#   algorithm. The result is given by the maximum of the case 1 sum and S - S2.
+#
+# Time complexity O(N).
+def max_sum_circular_arr(nums: Sequence[int]) -> int:
+    greatest: int = -sys.maxsize + 1
+    smallest: int = sys.maxsize
+    # Running sums
+    x = y = total = 0
+
+    for i in nums:
+        x += i
+        greatest = max(greatest, x)
+        # If running_sum is negative, we are better off taking just the next number
+        x = max(x, 0)
+
+        y += i
+        smallest = min(smallest, y)
+        # If running_sum is positive, we are better off taking just the next number
+        y = min(y, 0)
+
+        total += i
+
+    # If all numbers are negative, return the greatest one
+    return greatest if greatest < 0 else max(greatest, total - smallest)

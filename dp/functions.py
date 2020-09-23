@@ -1,5 +1,5 @@
 import math
-from typing import MutableSequence, Sequence, Tuple, Iterable
+from typing import MutableSequence, Sequence, Tuple, Iterable, Set
 
 
 # LeetCode 91.
@@ -88,3 +88,91 @@ def num_ways(matrix: Sequence[Sequence[int]]) -> int:
         return dp[r][c]
 
     return loop(m - 1, n - 1)
+
+
+def _subset_sum(nums: Sequence[int], k: int) -> Sequence[Sequence[bool]]:
+    """Helper method to solve the subset sum problem using dynamic programming.
+    The problem has optimal substructure because if a number at index i is included to make sum j,
+    there exists a subset of i - 1 numbers the sum of which is j - nums[i].
+
+    The overlapping subproblems property is easy to see; consider nums = [1, 2, 3]. If k = 1, for any i in [0, 3),
+    we can find a subset such that the sum is 1. Thus, d[i][1] would be true for all i in this case.
+
+    This is a variation of the 0/1 Knapsack problem where the profits and weights are equal to the numbers.
+    """
+    n = len(nums)
+    # dp[i][j] = True if sum j can be formed by taking some or all of the numbers from the first i numbers
+    dp: MutableSequence[MutableSequence[bool]] = [[False for _ in range(k + 1)] for _ in range(n)]
+
+    # Zero sum can be formed by taking no numbers regardless of i
+    for i in range(n):
+        dp[i][0] = True
+    # If there is just one number, and it's not greater than j, it's included to make a sum equal to the number
+    for j in range(1, k + 1):
+        dp[0][j] = nums[0] == j
+
+    for i in range(1, n):
+        for j in range(1, k + 1):
+            # The i-th number is included if:
+            #   It is less than or equal to the sum j, and
+            #   Sum j - nums[i] can be formed by taking some or all of the first i - 1 numbers
+            # Else the i-th number is excluded
+            dp[i][j] = dp[i - 1][j] or (nums[i] <= j and dp[i - 1][j - nums[i]])
+
+    return dp
+
+
+def _subset(dp: Sequence[Sequence[bool]], nums: Sequence[int], j: int) -> Set[int]:
+    """Return the indices corresponding to the numbers that form a subset such that the sum is equal to j."""
+    subset: Set[int] = set()
+    k = j
+    i = len(dp) - 1
+
+    while k > 0:
+        if dp[i][k] and dp[i - 1][k - nums[i]]:
+            subset.add(i)
+            k -= nums[i]
+        i -= 1
+
+    return subset
+
+
+# LeetCode 416.
+#
+# ANSWER: There exists two subsets whose sums are equal if:
+#  The total sum is even, and
+#  There exists a subset of the numbers such that its sum is half of the total sum.
+#
+# Time complexity: O(nk), where k = sum(nums) // 2, arising from the nested for loops.
+def equal_subset_sum(nums: Sequence[int]) -> Set[int]:
+    s = sum(nums)
+    if s % 2 != 0:
+        return None
+    k = s // 2
+    dp = _subset_sum(nums, k)
+
+    if not dp[-1][-1]:
+        return None
+
+    return _subset(dp, nums, k)
+
+
+# 186. Given an array of positive integers, divide the array into two subsets such that the difference between the sum
+# of the subsets is as small as possible.
+#
+# For example, given [5, 10, 15, 20, 25], return the sets {10, 25} and {5, 15, 20}, which has a difference of 5, which
+# is the smallest possible difference.
+#
+# ANSWER: Note that the smallest possible difference between two subsets is zero. Thus, we proceed similar to the
+# equal subset sum problem, except that in the end, we start backtracking from the greatest sum that could be made,
+# instead of starting from k = sum // 2. In other words, we check if sum k could be made out of a subset, then we
+# check if sum k - 1 could be made, so on and so forth. Note that the other subset may have a greater sum, but by
+# maximizing the sum for this subset, we minimize the difference between the two sums.
+def min_subset_sum(nums: Sequence[int]) -> Set[int]:
+    s = sum(nums)
+    k = s // 2
+    dp = _subset_sum(nums, k)
+
+    j = next(x for x in range(k, -1, -1) if dp[-1][x])
+
+    return _subset(dp, nums, j)

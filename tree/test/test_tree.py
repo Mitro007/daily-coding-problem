@@ -85,3 +85,6 @@ class TestTree:
         postorder = [9, 15, 7, 20, 3]
         inorder = [9, 3, 15, 20, 7]
         assert list(func.from_postorder_and_inorder(postorder, inorder)) == inorder
+
+    def test_overlapping_rectangles(self):
+        assert func.overlapping_rectangles([((1, 4), (3, 3)), ((-1, 3), (2, 1)), ((0, 5), (4, 3))]) == {(0, 2), (1, 2)}

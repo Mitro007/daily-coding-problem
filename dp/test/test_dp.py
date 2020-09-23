@@ -1,3 +1,5 @@
+import pytest
+
 from dp import functions as func
 
 
@@ -35,3 +37,32 @@ class TestDP:
             [0, 0, 0]
         ]
         assert func.num_ways(matrix) == 3
+
+    @pytest.mark.parametrize("nums, subset_sum", [
+        ([1, 5, 11, 5], 11),
+        ([1, 2, 3, 5], None),
+        ([1, 2, 3, 4], 5),
+        ([1, 1, 3, 4, 7], 8),
+        ([2, 3, 4, 6], None),
+        ([1, 2, 5], None),
+        ([16, 14, 13, 13, 12, 10, 9, 3], 45),
+        ([0, 1, 5, 6], 6)
+    ])
+    def test_equal_subset_sum(self, nums, subset_sum):
+        subset = func.equal_subset_sum(nums)
+        if subset_sum:
+            assert sum(map(lambda i: nums[i], subset)) == subset_sum
+        else:
+            assert not subset
+
+    @pytest.mark.parametrize("nums, diff", [
+        ([5, 10, 15, 20, 25], 5),
+        ([0, 1, 5, 6], 0),
+        ([16, 14, 13, 13, 12, 10, 9, 3], 0)
+    ])
+    def test_min_subset_sum(self, nums, diff):
+        x = sum(nums)
+        subset = map(lambda i: nums[i], func.min_subset_sum(nums))
+        y = sum(subset)
+        # x - y gives the sum of the other subset, so x - y - y is the difference of sum of the two subsets
+        assert abs(x - y - y) == diff

@@ -1,8 +1,12 @@
 import bisect
 import collections
+import heapq
 import operator
 import sys
-from typing import TypeVar, Dict, Callable, Tuple, Set, MutableMapping, Iterable, Deque, Sequence, Mapping
+from typing import TypeVar, Dict, Callable, Tuple, Set, MutableMapping, Iterable, Deque, Sequence, Mapping, \
+    List
+
+from intervaltree import IntervalTree, Interval
 
 from tree.binary_tree import BinaryTree
 
@@ -382,3 +386,71 @@ def from_postorder_and_inorder(postorder: Sequence[int], inorder: Sequence[int])
         return root_node
 
     return build_subtree(0, len(postorder))
+
+
+# 187. You are given given a list of rectangles represented by min and max x- and y-coordinates.
+# Compute whether or not a pair of rectangles overlap each other.
+# If one rectangle completely covers another, it is considered overlapping.
+#
+# For example, given the following rectangles:
+#
+# {
+#     "top_left": (1, 4),
+#     "dimensions": (3, 3) # width, height
+# },
+# {
+#     "top_left": (-1, 3),
+#     "dimensions": (2, 1)
+# },
+# {
+#     "top_left": (0, 5),
+#     "dimensions": (4, 3)
+# }
+# return true as the first and third rectangle overlap each other.
+#
+# ANSWER: We solve a more general problem of finding all intersecting rectangles by using the algorithm from chapter
+# 9.9, lecture 5 of Algorithms 1 (https://www.coursera.org/learn/algorithms-part1). It goes as follows:
+#
+# 1. Insert the x-coordinates in a priority queue; if there's a case where the end of one rectangle coincides with
+# the beginning of another, prioritize the end over the beginning.
+# 2. For each item in the queue, do the following:
+#   If it's the beginning of a rectangle:
+#       1. Find all intervals that overlap with the corresponding y-interval of this rectangle.
+#       2. Insert the y-interval of this rectangle in the interval search tree.
+#   Else if it's an end of a rectangle, delete the corresponding y-interval from the interval search tree.
+#
+# Time complexity:
+#   Building priority queue: Since each operation takes O(log n) time, total time = O(2n log n) = O(n log n).
+#   Each interval search tree operation takes O(log n) time; every item on the queue is either inserted in the tree
+#   or removed, total time is O(2n log n) = O(n log n).
+#   If the number of intersections for an interval is r, time to find all overlapping intervals is O(r log n).
+#   If all the rectangles overlap (for example, each one inside another), total time is O(n^2 log n).
+# Total time complexity: O(n log n) + O(r*n log n), where r is the average number of intersections.
+#
+# See test/rectangles.jpg for a diagram.
+def overlapping_rectangles(rect: Sequence[Tuple[Tuple[int, int], Tuple[int, int]]]) -> Set[Tuple[int, int]]:
+    # [(x, (begin, index, (y-lo, y-hi)))]
+    # begin is an int so that 0 = False is prioritized over 1 = True
+    pq: List[Tuple[int, Tuple[int, int, Tuple[int, int]]]] = []
+    for i in range(len(rect)):
+        x_left = rect[i][0][0]
+        width = rect[i][1][0]
+        x_right = x_left + width
+        y_hi = rect[i][0][1]
+        height = rect[i][1][1]
+        y_lo = y_hi - height
+        heapq.heappush(pq, (x_left, (1, i, (y_lo, y_hi))))
+        heapq.heappush(pq, (x_right, (0, i, (y_lo, y_hi))))
+
+    overlapping: Set[Tuple[int, int]] = set()
+    t = IntervalTree()
+    while pq:
+        x, (begin, i, (y_lo, y_hi)) = heapq.heappop(pq)
+        if begin:
+            for r in t[y_lo:y_hi]:
+                pair = (i, r.data) if i < r.data else (r.data, i)
+                overlapping.add(pair)
+            t[y_lo:y_hi] = i
+        else:
+            t.remove(Interval(y_lo, y_hi, i))
+    return overlapping
